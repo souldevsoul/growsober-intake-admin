@@ -21,7 +21,13 @@ export function Sidebar() {
           const active =
             item.href === '/'
               ? pathname === '/'
-              : pathname.startsWith(item.href);
+              : (pathname === item.href || pathname.startsWith(item.href + '/')) &&
+                !nav.some(
+                  (other) =>
+                    other.href !== item.href &&
+                    other.href.length > item.href.length &&
+                    (pathname === other.href || pathname.startsWith(other.href + '/'))
+                );
           return (
             <Link
               key={item.href}

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { getLeads, getStats, updateLead, retryPayment } from '@/lib/api';
 import type { Lead, Stats } from '@/lib/api';
+import { STATUS_COLORS, formatStatus } from '@/lib/constants';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,14 +26,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-const STATUS_COLORS: Record<string, string> = {
-  CALLED: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
-  INFO_COLLECTED: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  LINK_SENT: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-  PAID: 'bg-green-500/20 text-green-300 border-green-500/30',
-  MATCHED: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  FAILED: 'bg-red-500/20 text-red-300 border-red-500/30',
-};
 
 export default function Dashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -105,7 +98,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{stats?.total ?? '-'}</p>
+              <p className="text-2xl font-bold">{stats?.total ?? 0}</p>
             </CardContent>
           </Card>
           <Card className="bg-gray-900 border-gray-800">
@@ -115,7 +108,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{stats?.today ?? '-'}</p>
+              <p className="text-2xl font-bold">{stats?.today ?? 0}</p>
             </CardContent>
           </Card>
           <Card className="bg-gray-900 border-gray-800">
@@ -126,7 +119,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold text-green-400">
-                {stats?.byStatus?.PAID ?? '-'}
+                {stats?.byStatus?.PAID ?? 0}
               </p>
             </CardContent>
           </Card>
@@ -138,7 +131,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold text-emerald-400">
-                {stats?.byStatus?.MATCHED ?? '-'}
+                {stats?.byStatus?.MATCHED ?? 0}
               </p>
             </CardContent>
           </Card>
@@ -149,7 +142,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{stats?.conversionRate ?? '-'}</p>
+              <p className="text-2xl font-bold">{stats?.conversionRate ?? 0}%</p>
             </CardContent>
           </Card>
         </div>
@@ -229,7 +222,7 @@ export default function Dashboard() {
                           variant="outline"
                           className={STATUS_COLORS[lead.status] || ''}
                         >
-                          {lead.status.replace('_', ' ')}
+                          {formatStatus(lead.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>

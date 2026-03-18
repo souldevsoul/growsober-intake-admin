@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
+import { ChevronLeft } from 'lucide-react';
 import {
   getSequence,
   updateSequence,
@@ -14,6 +15,7 @@ import {
   cancelEnrollment,
 } from '@/lib/api';
 import type { DripSequenceDetail, DripStep } from '@/lib/api';
+import { ENROLLMENT_COLORS, TRIGGER_LABELS } from '@/lib/constants';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,13 +36,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-const ENROLLMENT_COLORS: Record<string, string> = {
-  ACTIVE: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  COMPLETED: 'bg-green-500/20 text-green-300 border-green-500/30',
-  PAUSED: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-  CANCELLED: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
-};
 
 function formatDelay(minutes: number): string {
   if (minutes === 0) return 'Immediate';
@@ -123,12 +118,12 @@ export default function SequenceDetailPage() {
     fetchSequence();
   };
 
-  if (loading) return <div className="p-6 text-gray-500">Loading...</div>;
-  if (!sequence) return <div className="p-6 text-gray-500">Sequence not found</div>;
+  if (loading) return <div className="min-h-screen bg-gray-950 text-white p-6"><p className="text-gray-500">Loading...</p></div>;
+  if (!sequence) return <div className="min-h-screen bg-gray-950 text-white p-6"><p className="text-gray-500">Sequence not found</p></div>;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
@@ -136,6 +131,7 @@ export default function SequenceDetailPage() {
             onClick={() => router.push('/crm/sequences')}
             className="text-gray-400"
           >
+            <ChevronLeft className="w-4 h-4 mr-1" />
             Back
           </Button>
           <div className="flex-1">
@@ -145,7 +141,7 @@ export default function SequenceDetailPage() {
             )}
           </div>
           <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-            {sequence.trigger}
+            {TRIGGER_LABELS[sequence.trigger] || sequence.trigger}
             {sequence.triggerValue && `: ${sequence.triggerValue}`}
           </Badge>
           <button
@@ -311,7 +307,7 @@ export default function SequenceDetailPage() {
                   </TableRow>
                 ) : (
                   sequence.enrollments.map((e) => (
-                    <TableRow key={e.id} className="border-gray-800">
+                    <TableRow key={e.id} className="border-gray-800 hover:bg-gray-800/50">
                       <TableCell className="font-medium">{e.lead.name || '-'}</TableCell>
                       <TableCell className="font-mono text-sm">{e.lead.phone}</TableCell>
                       <TableCell>

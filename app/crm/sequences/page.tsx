@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { getSequences, createSequence, updateSequence } from '@/lib/api';
 import type { DripSequence } from '@/lib/api';
+import { TRIGGER_LABELS } from '@/lib/constants';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,13 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-const TRIGGER_LABELS: Record<string, string> = {
-  MANUAL: 'Manual',
-  ON_LEAD_CREATED: 'On Lead Created',
-  ON_STATUS_CHANGE: 'On Status Change',
-  ON_TAG_ADDED: 'On Tag Added',
-};
 
 export default function SequencesPage() {
   const router = useRouter();
@@ -82,7 +76,7 @@ export default function SequencesPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Drip Sequences</h1>
           <Button onClick={() => setShowCreate(!showCreate)}>

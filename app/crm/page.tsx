@@ -12,6 +12,7 @@ import {
   enrollLeads,
 } from '@/lib/api';
 import type { CrmLead, DripSequence } from '@/lib/api';
+import { STATUS_COLORS, ENROLLMENT_COLORS, formatStatus } from '@/lib/constants';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,21 +35,6 @@ import {
 } from '@/components/ui/table';
 import { TagManager } from '@/components/crm/TagManager';
 
-const STATUS_COLORS: Record<string, string> = {
-  CALLED: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
-  INFO_COLLECTED: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  LINK_SENT: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-  PAID: 'bg-green-500/20 text-green-300 border-green-500/30',
-  MATCHED: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  FAILED: 'bg-red-500/20 text-red-300 border-red-500/30',
-};
-
-const ENROLLMENT_COLORS: Record<string, string> = {
-  ACTIVE: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  COMPLETED: 'bg-green-500/20 text-green-300 border-green-500/30',
-  PAUSED: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-  CANCELLED: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
-};
 
 export default function CrmLeadsPage() {
   const [leads, setLeads] = useState<CrmLead[]>([]);
@@ -275,7 +261,7 @@ export default function CrmLeadsPage() {
                       <TableCell>{lead.city || '-'}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={STATUS_COLORS[lead.status] || ''}>
-                          {lead.status.replace('_', ' ')}
+                          {formatStatus(lead.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>
