@@ -54,7 +54,7 @@ export default function Dashboard() {
         getStats(),
       ]);
 
-      setLeads(leadsRes.data || leadsRes);
+      setLeads(Array.isArray(leadsRes) ? leadsRes : leadsRes.data || leadsRes);
       setStats(statsRes);
     } catch (err) {
       console.error('Failed to fetch data:', err);

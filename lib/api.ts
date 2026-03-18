@@ -93,7 +93,9 @@ export interface DripSequenceDetail extends DripSequence {
 
 export async function getLeads(params?: Record<string, string>) {
   const { data } = await api.get('/leads', { params });
-  return data;
+  // API wraps as {data: {data: [...], meta: {...}}}
+  const inner = data.data || data;
+  return Array.isArray(inner) ? inner : inner.data || inner;
 }
 
 export async function getLead(id: string) {
