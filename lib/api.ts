@@ -151,7 +151,10 @@ export async function getCrmLeads(params?: Record<string, string>): Promise<{
   meta: { total: number; page: number; limit: number; pages: number };
 }> {
   const { data } = await crmApi.get('/leads', { params });
-  return data.data ? { data: data.data, meta: data.meta } : { data, meta: { total: 0, page: 1, limit: 50, pages: 1 } };
+  // API double-wraps: {data: {data: [...], meta: {...}}, meta: {...}}
+  const inner = data.data || data;
+  if (Array.isArray(inner)) return { data: inner, meta: data.meta || { total: inner.length, page: 1, limit: 50, pages: 1 } };
+  return { data: inner.data || [], meta: inner.meta || { total: 0, page: 1, limit: 50, pages: 1 } };
 }
 
 // ============================================================================
