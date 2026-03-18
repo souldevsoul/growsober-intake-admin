@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Sidebar } from "@/components/layout/Sidebar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -8,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "GrowSober Intake Admin",
-  description: "Phone intake lead management dashboard",
+  title: "GrowSober Admin",
+  description: "Lead management and CRM dashboard",
 };
 
 export default function RootLayout({
@@ -20,7 +21,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} font-sans antialiased`}>
-        {children}
+        <div className="flex">
+          <Sidebar />
+          <main className="flex-1 min-h-screen">{children}</main>
+        </div>
       </body>
     </html>
   );
