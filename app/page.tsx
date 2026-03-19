@@ -85,64 +85,64 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <div className="min-h-screen bg-black neon-grid-bg text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold">GrowSober Intake Admin</h1>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">
+              <CardTitle className="text-sm font-medium text-white/40">
                 Total Leads
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{stats?.total ?? 0}</p>
+              <p className="text-2xl font-bold mono-num">{stats?.total ?? 0}</p>
             </CardContent>
           </Card>
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">
+              <CardTitle className="text-sm font-medium text-white/40">
                 Today
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{stats?.today ?? 0}</p>
+              <p className="text-2xl font-bold mono-num">{stats?.today ?? 0}</p>
             </CardContent>
           </Card>
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">
+              <CardTitle className="text-sm font-medium text-white/40">
                 Paid
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-green-400">
+              <p className="text-2xl font-bold text-green-400 mono-num">
                 {stats?.byStatus?.PAID ?? 0}
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">
+              <CardTitle className="text-sm font-medium text-white/40">
                 Matched
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-emerald-400">
+              <p className="text-2xl font-bold text-emerald-400 mono-num">
                 {stats?.byStatus?.MATCHED ?? 0}
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">
+              <CardTitle className="text-sm font-medium text-white/40">
                 Conversion
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{stats?.conversionRate ?? 0}%</p>
+              <p className="text-2xl font-bold mono-num">{stats?.conversionRate ?? 0}%</p>
             </CardContent>
           </Card>
         </div>
@@ -153,13 +153,13 @@ export default function Dashboard() {
             placeholder="Search by name or phone..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-gray-900 border-gray-800 text-white placeholder:text-gray-500 max-w-sm"
+            className="bg-black border-white/[0.15] text-white placeholder:text-white/30 max-w-sm"
           />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="bg-gray-900 border-gray-800 text-white w-[180px]">
+            <SelectTrigger className="bg-black border-white/[0.15] text-white w-[180px]">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-900 border-gray-800">
+            <SelectContent className="bg-black border-white/[0.15]">
               <SelectItem value="all">All statuses</SelectItem>
               <SelectItem value="CALLED">Called</SelectItem>
               <SelectItem value="INFO_COLLECTED">Info Collected</SelectItem>
@@ -172,44 +172,44 @@ export default function Dashboard() {
           <Button
             variant="outline"
             onClick={fetchData}
-            className="border-gray-800 text-gray-300 hover:bg-gray-800"
+            className="border-white/[0.15] text-white/60 hover:bg-white/[0.06]"
           >
             Refresh
           </Button>
         </div>
 
         {/* Leads Table */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="neon-card">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow className="border-gray-800 hover:bg-gray-900">
-                  <TableHead className="text-gray-400">Name</TableHead>
-                  <TableHead className="text-gray-400">Phone</TableHead>
-                  <TableHead className="text-gray-400">City</TableHead>
-                  <TableHead className="text-gray-400">Status</TableHead>
-                  <TableHead className="text-gray-400">Source</TableHead>
-                  <TableHead className="text-gray-400">Hub</TableHead>
-                  <TableHead className="text-gray-400">When</TableHead>
-                  <TableHead className="text-gray-400">Actions</TableHead>
+                <TableRow className="border-white/[0.08] hover:bg-transparent">
+                  <TableHead className="text-white/40">Name</TableHead>
+                  <TableHead className="text-white/40">Phone</TableHead>
+                  <TableHead className="text-white/40">City</TableHead>
+                  <TableHead className="text-white/40">Status</TableHead>
+                  <TableHead className="text-white/40">Source</TableHead>
+                  <TableHead className="text-white/40">Hub</TableHead>
+                  <TableHead className="text-white/40">When</TableHead>
+                  <TableHead className="text-white/40">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-gray-500 py-8">
+                    <TableCell colSpan={8} className="text-center text-white/30 py-8">
                       Loading...
                     </TableCell>
                   </TableRow>
                 ) : leads.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-gray-500 py-8">
+                    <TableCell colSpan={8} className="text-center text-white/30 py-8">
                       No leads found
                     </TableCell>
                   </TableRow>
                 ) : (
                   leads.map((lead) => (
-                    <TableRow key={lead.id} className="border-gray-800 hover:bg-gray-800/50">
+                    <TableRow key={lead.id} className="border-white/[0.08] hover:bg-white/[0.04]">
                       <TableCell className="font-medium">
                         {lead.name || '-'}
                       </TableCell>
@@ -220,18 +220,18 @@ export default function Dashboard() {
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={STATUS_COLORS[lead.status] || ''}
+                          className={`uppercase tracking-wider text-xs font-semibold ${STATUS_COLORS[lead.status] || ''}`}
                         >
                           {formatStatus(lead.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className="bg-gray-800 text-gray-300">
+                        <Badge variant="secondary" className="bg-white/[0.04] text-white/60 uppercase tracking-wider text-xs font-semibold">
                           {lead.source}
                         </Badge>
                       </TableCell>
                       <TableCell>{lead.hub?.name || '-'}</TableCell>
-                      <TableCell className="text-gray-400 text-sm">
+                      <TableCell className="text-white/40 text-sm">
                         {formatDistanceToNow(new Date(lead.createdAt), {
                           addSuffix: true,
                         })}

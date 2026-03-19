@@ -197,18 +197,18 @@ export default function CrmLeadsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <div className="min-h-screen bg-black neon-grid-bg text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">CRM Leads</h1>
           <div className="flex items-center gap-3">
-            <div className="flex rounded-lg border border-gray-800 overflow-hidden">
+            <div className="flex rounded-lg border border-white/[0.12] overflow-hidden">
               <button
                 onClick={() => setViewMode('table')}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   viewMode === 'table'
-                    ? 'bg-gray-800 text-white'
-                    : 'bg-gray-900 text-gray-400 hover:text-gray-200'
+                    ? 'bg-white/[0.06] text-white'
+                    : 'bg-black text-white/40 hover:text-white/60'
                 }`}
               >
                 Table
@@ -217,14 +217,14 @@ export default function CrmLeadsPage() {
                 onClick={() => setViewMode('pipeline')}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   viewMode === 'pipeline'
-                    ? 'bg-gray-800 text-white'
-                    : 'bg-gray-900 text-gray-400 hover:text-gray-200'
+                    ? 'bg-white/[0.06] text-white'
+                    : 'bg-black text-white/40 hover:text-white/60'
                 }`}
               >
                 Pipeline
               </button>
             </div>
-            <span className="text-sm text-gray-400">{total} leads</span>
+            <span className="text-sm text-white/40 mono-num">{total} leads</span>
           </div>
         </div>
 
@@ -244,13 +244,13 @@ export default function CrmLeadsPage() {
             placeholder="Search name or phone..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="bg-gray-900 border-gray-800 text-white placeholder:text-gray-500 max-w-xs"
+            className="bg-black border-white/[0.15] text-white placeholder:text-white/30 max-w-xs"
           />
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-            <SelectTrigger className="bg-gray-900 border-gray-800 text-white w-[160px]">
+            <SelectTrigger className="bg-black border-white/[0.15] text-white w-[160px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-900 border-gray-800">
+            <SelectContent className="bg-black border-white/[0.15]">
               <SelectItem value="all">All statuses</SelectItem>
               <SelectItem value="CALLED">Called</SelectItem>
               <SelectItem value="INFO_COLLECTED">Info Collected</SelectItem>
@@ -261,10 +261,10 @@ export default function CrmLeadsPage() {
             </SelectContent>
           </Select>
           <Select value={sourceFilter} onValueChange={(v) => { setSourceFilter(v); setPage(1); }}>
-            <SelectTrigger className="bg-gray-900 border-gray-800 text-white w-[140px]">
+            <SelectTrigger className="bg-black border-white/[0.15] text-white w-[140px]">
               <SelectValue placeholder="Source" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-900 border-gray-800">
+            <SelectContent className="bg-black border-white/[0.15]">
               <SelectItem value="all">All sources</SelectItem>
               <SelectItem value="CALL">Call</SelectItem>
               <SelectItem value="SMS">SMS</SelectItem>
@@ -275,7 +275,7 @@ export default function CrmLeadsPage() {
           <Button
             variant="outline"
             onClick={fetchData}
-            className="border-gray-800 text-gray-300 hover:bg-gray-800"
+            className="border-white/[0.15] text-white/60 hover:bg-white/[0.06]"
           >
             Refresh
           </Button>
@@ -283,23 +283,23 @@ export default function CrmLeadsPage() {
 
         {/* Bulk Actions */}
         {selectedIds.size > 0 && (
-          <div className="flex items-center gap-3 p-3 bg-gray-900 rounded-lg border border-gray-800">
-            <span className="text-sm text-gray-400">{selectedIds.size} selected</span>
+          <div className="flex items-center gap-3 p-3 neon-card">
+            <span className="text-sm text-white/40 mono-num">{selectedIds.size} selected</span>
             <Input
               placeholder="Tags (comma-separated)"
               value={bulkTagInput}
               onChange={(e) => setBulkTagInput(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white w-48 h-8 text-sm"
+              className="bg-white/[0.04] border-white/[0.12] text-white w-48 h-8 text-sm"
             />
             <Button size="sm" onClick={handleBulkTag} className="h-8">
               Tag Selected
             </Button>
             {sequences.length > 0 && (
               <Select onValueChange={handleBulkEnroll}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white w-[180px] h-8 text-sm">
+                <SelectTrigger className="bg-white/[0.04] border-white/[0.12] text-white w-[180px] h-8 text-sm">
                   <SelectValue placeholder="Enroll in..." />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-900 border-gray-800">
+                <SelectContent className="bg-black border-white/[0.15]">
                   {sequences.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.name}
@@ -312,7 +312,7 @@ export default function CrmLeadsPage() {
               size="sm"
               variant="ghost"
               onClick={() => setSelectedIds(new Set())}
-              className="text-gray-400 h-8"
+              className="text-white/40 h-8"
             >
               Clear
             </Button>
@@ -322,18 +322,18 @@ export default function CrmLeadsPage() {
         {/* View: Pipeline or Table */}
         {viewMode === 'pipeline' ? (
           loading ? (
-            <div className="text-center text-gray-500 py-8">Loading...</div>
+            <div className="text-center text-white/30 py-8">Loading...</div>
           ) : (
             <KanbanBoard leads={leads} onStatusChange={handleStatusChange} />
           )
         ) : (
           <>
             {/* Leads Table */}
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="neon-card">
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-gray-800 hover:bg-gray-900">
+                    <TableRow className="border-white/[0.08] hover:bg-transparent">
                       <TableHead className="w-10">
                         <input
                           type="checkbox"
@@ -342,32 +342,32 @@ export default function CrmLeadsPage() {
                           className="accent-blue-500"
                         />
                       </TableHead>
-                      <TableHead className="text-gray-400">Name</TableHead>
-                      <TableHead className="text-gray-400">Phone</TableHead>
-                      <TableHead className="text-gray-400">City</TableHead>
-                      <TableHead className="text-gray-400">Status</TableHead>
-                      <TableHead className="text-gray-400">Source</TableHead>
-                      <TableHead className="text-gray-400">Tags</TableHead>
-                      <TableHead className="text-gray-400">Drip</TableHead>
-                      <TableHead className="text-gray-400">When</TableHead>
+                      <TableHead className="text-white/40">Name</TableHead>
+                      <TableHead className="text-white/40">Phone</TableHead>
+                      <TableHead className="text-white/40">City</TableHead>
+                      <TableHead className="text-white/40">Status</TableHead>
+                      <TableHead className="text-white/40">Source</TableHead>
+                      <TableHead className="text-white/40">Tags</TableHead>
+                      <TableHead className="text-white/40">Drip</TableHead>
+                      <TableHead className="text-white/40">When</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {loading ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="text-center text-gray-500 py-8">
+                        <TableCell colSpan={9} className="text-center text-white/30 py-8">
                           Loading...
                         </TableCell>
                       </TableRow>
                     ) : leads.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="text-center text-gray-500 py-8">
+                        <TableCell colSpan={9} className="text-center text-white/30 py-8">
                           No leads found
                         </TableCell>
                       </TableRow>
                     ) : (
                       leads.map((lead) => (
-                        <TableRow key={lead.id} onClick={() => router.push(`/crm/leads/${lead.id}`)} className="border-gray-800 hover:bg-gray-800/50 cursor-pointer">
+                        <TableRow key={lead.id} onClick={() => router.push(`/crm/leads/${lead.id}`)} className="border-white/[0.08] hover:bg-white/[0.04] cursor-pointer">
                           <TableCell>
                             <input
                               type="checkbox"
@@ -380,12 +380,12 @@ export default function CrmLeadsPage() {
                           <TableCell className="font-mono text-sm">{lead.phone}</TableCell>
                           <TableCell>{lead.city || '-'}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={STATUS_COLORS[lead.status] || ''}>
+                            <Badge variant="outline" className={`uppercase tracking-wider text-xs font-semibold ${STATUS_COLORS[lead.status] || ''}`}>
                               {formatStatus(lead.status)}
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary" className="bg-gray-800 text-gray-300">
+                            <Badge variant="secondary" className="bg-white/[0.04] text-white/60 uppercase tracking-wider text-xs font-semibold">
                               {lead.source}
                             </Badge>
                           </TableCell>
@@ -403,17 +403,17 @@ export default function CrmLeadsPage() {
                                   <Badge
                                     key={e.id}
                                     variant="outline"
-                                    className={`text-xs ${ENROLLMENT_COLORS[e.status] || ''}`}
+                                    className={`text-xs uppercase tracking-wider font-semibold ${ENROLLMENT_COLORS[e.status] || ''}`}
                                   >
                                     {e.sequence.name} (step {e.currentStep})
                                   </Badge>
                                 ))}
                               </div>
                             ) : (
-                              <span className="text-gray-600 text-sm">-</span>
+                              <span className="text-white/30 text-sm">-</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-gray-400 text-sm">
+                          <TableCell className="text-white/40 text-sm">
                             {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
                           </TableCell>
                         </TableRow>
@@ -432,11 +432,11 @@ export default function CrmLeadsPage() {
                   variant="outline"
                   disabled={page <= 1}
                   onClick={() => setPage(page - 1)}
-                  className="border-gray-800 text-gray-300"
+                  className="border-white/[0.15] text-white/60"
                 >
                   Previous
                 </Button>
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-white/40 mono-num">
                   Page {page} of {pages}
                 </span>
                 <Button
@@ -444,7 +444,7 @@ export default function CrmLeadsPage() {
                   variant="outline"
                   disabled={page >= pages}
                   onClick={() => setPage(page + 1)}
-                  className="border-gray-800 text-gray-300"
+                  className="border-white/[0.15] text-white/60"
                 >
                   Next
                 </Button>

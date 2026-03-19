@@ -27,7 +27,7 @@ import {
 const STATUS_BADGES: Record<string, string> = {
   PENDING: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
   SENT: 'bg-green-500/20 text-green-300 border-green-500/30',
-  CANCELLED: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
+  CANCELLED: 'bg-gray-500/20 text-white/60 border-gray-500/30',
   FAILED: 'bg-red-500/20 text-red-300 border-red-500/30',
 };
 
@@ -78,12 +78,12 @@ export default function ScheduledMessagesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <div className="min-h-screen bg-black neon-grid-bg text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Scheduled Messages</h1>
           <div className="flex items-center gap-3">
-            <label className="text-sm text-gray-400">Status:</label>
+            <label className="text-sm text-white/40">Status:</label>
             <Select
               value={statusFilter}
               onValueChange={(val) => {
@@ -91,10 +91,10 @@ export default function ScheduledMessagesPage() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="w-40 bg-gray-800 border-gray-700 text-white">
+              <SelectTrigger className="w-40 bg-white/[0.04] border-white/[0.12] text-white">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-800">
+              <SelectContent className="bg-black border-white/[0.15]">
                 <SelectItem value="ALL">All</SelectItem>
                 <SelectItem value="PENDING">Pending</SelectItem>
                 <SelectItem value="SENT">Sent</SelectItem>
@@ -105,49 +105,49 @@ export default function ScheduledMessagesPage() {
           </div>
         </div>
 
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="neon-card">
           <CardHeader>
             <CardTitle className="text-lg">
-              {meta.total} message{meta.total !== 1 ? 's' : ''}
+              <span className="mono-num">{meta.total}</span> message{meta.total !== 1 ? 's' : ''}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <p className="text-gray-500 text-center py-8">Loading...</p>
+              <p className="text-white/30 text-center py-8">Loading...</p>
             ) : messages.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No scheduled messages found.</p>
+              <p className="text-white/30 text-center py-8">No scheduled messages found.</p>
             ) : (
               <>
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-gray-800">
-                      <TableHead className="text-gray-400">Lead Name</TableHead>
-                      <TableHead className="text-gray-400">Phone</TableHead>
-                      <TableHead className="text-gray-400">Message</TableHead>
-                      <TableHead className="text-gray-400">Scheduled For</TableHead>
-                      <TableHead className="text-gray-400">Status</TableHead>
-                      <TableHead className="text-gray-400">Actions</TableHead>
+                    <TableRow className="border-white/[0.08]">
+                      <TableHead className="text-white/40">Lead Name</TableHead>
+                      <TableHead className="text-white/40">Phone</TableHead>
+                      <TableHead className="text-white/40">Message</TableHead>
+                      <TableHead className="text-white/40">Scheduled For</TableHead>
+                      <TableHead className="text-white/40">Status</TableHead>
+                      <TableHead className="text-white/40">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {messages.map((msg) => (
-                      <TableRow key={msg.id} className="border-gray-800">
+                      <TableRow key={msg.id} className="border-white/[0.08]">
                         <TableCell className="text-white font-medium">
                           {msg.lead.name || 'Unknown'}
                         </TableCell>
-                        <TableCell className="text-gray-300">{msg.lead.phone}</TableCell>
-                        <TableCell className="text-gray-300 max-w-xs">
+                        <TableCell className="text-white/60">{msg.lead.phone}</TableCell>
+                        <TableCell className="text-white/60 max-w-xs">
                           {msg.content.length > 60
                             ? msg.content.slice(0, 60) + '...'
                             : msg.content}
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-white/60">
                           {format(new Date(msg.scheduledAt), 'MMM d, yyyy h:mm a')}
                         </TableCell>
                         <TableCell>
                           <Badge
                             variant="outline"
-                            className={STATUS_BADGES[msg.status] || STATUS_BADGES.PENDING}
+                            className={`uppercase tracking-wider text-xs font-semibold ${STATUS_BADGES[msg.status] || STATUS_BADGES.PENDING}`}
                           >
                             {msg.status}
                           </Badge>
@@ -158,7 +158,7 @@ export default function ScheduledMessagesPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                                className="bg-transparent border-white/[0.12] text-white/60 hover:bg-white/[0.06] hover:text-white"
                                 onClick={() => handleCancel(msg.id)}
                               >
                                 Cancel
@@ -180,15 +180,15 @@ export default function ScheduledMessagesPage() {
 
                 {/* Pagination */}
                 {meta.pages > 1 && (
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
-                    <span className="text-sm text-gray-400">
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.08]">
+                    <span className="text-sm text-white/40 mono-num">
                       Page {meta.page} of {meta.pages}
                     </span>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800"
+                        className="bg-transparent border-white/[0.12] text-white/60 hover:bg-white/[0.06]"
                         disabled={page <= 1}
                         onClick={() => setPage((p) => p - 1)}
                       >
@@ -197,7 +197,7 @@ export default function ScheduledMessagesPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800"
+                        className="bg-transparent border-white/[0.12] text-white/60 hover:bg-white/[0.06]"
                         disabled={page >= meta.pages}
                         onClick={() => setPage((p) => p + 1)}
                       >

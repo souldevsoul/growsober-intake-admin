@@ -180,16 +180,16 @@ export default function LeadDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white p-6">
-        <p className="text-gray-500">Loading...</p>
+      <div className="min-h-screen bg-black neon-grid-bg text-white p-6">
+        <p className="text-white/30">Loading...</p>
       </div>
     );
   }
 
   if (!lead) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white p-6">
-        <p className="text-gray-500">Lead not found</p>
+      <div className="min-h-screen bg-black neon-grid-bg text-white p-6">
+        <p className="text-white/30">Lead not found</p>
       </div>
     );
   }
@@ -200,27 +200,27 @@ export default function LeadDetailPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <div className="min-h-screen bg-black neon-grid-bg text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={() => router.push('/crm')}
-            className="text-gray-400"
+            className="text-white/40"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back
           </Button>
           <div className="flex-1">
             <h1 className="text-2xl font-bold">{lead.name || 'Unknown'}</h1>
-            <p className="text-gray-400 font-mono text-sm">{lead.phone}</p>
+            <p className="text-white/40 font-mono text-sm">{lead.phone}</p>
           </div>
           <Select value={lead.status} onValueChange={handleStatusChange}>
-            <SelectTrigger className="bg-gray-900 border-gray-800 text-white w-[180px]">
+            <SelectTrigger className="bg-black border-white/[0.15] text-white w-[180px]">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-gray-900 border-gray-800">
+            <SelectContent className="bg-black border-white/[0.15]">
               {STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>
                   {formatStatus(s)}
@@ -228,54 +228,54 @@ export default function LeadDetailPage() {
               ))}
             </SelectContent>
           </Select>
-          <Badge variant="secondary" className="bg-gray-800 text-gray-300">
+          <Badge variant="secondary" className="bg-white/[0.04] text-white/60 uppercase tracking-wider text-xs font-semibold">
             {lead.source}
           </Badge>
           <Badge
             variant="outline"
             className={getScoreColor(lead.score ?? 0)}
           >
-            Score: {lead.score ?? 0}
+            Score: <span className="mono-num">{lead.score ?? 0}</span>
           </Badge>
         </div>
 
         {/* Quick Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardContent className="p-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">City</p>
+              <p className="text-xs text-white/30 uppercase tracking-wider mb-1">City</p>
               <p className="text-sm font-medium">{lead.city || '-'}</p>
             </CardContent>
           </Card>
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardContent className="p-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Sobriety Status</p>
+              <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Sobriety Status</p>
               <p className="text-sm font-medium">{lead.sobrietyStatus || '-'}</p>
             </CardContent>
           </Card>
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardContent className="p-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Interests</p>
+              <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Interests</p>
               <div className="flex flex-wrap gap-1 mt-1">
                 {lead.interests?.length > 0 ? (
                   lead.interests.map((interest) => (
                     <Badge
                       key={interest}
                       variant="outline"
-                      className="text-xs bg-purple-500/20 text-purple-300 border-purple-500/30"
+                      className="text-xs bg-purple-500/20 text-purple-300 border-purple-500/30 uppercase tracking-wider font-semibold"
                     >
                       {interest}
                     </Badge>
                   ))
                 ) : (
-                  <span className="text-sm text-gray-500">-</span>
+                  <span className="text-sm text-white/30">-</span>
                 )}
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardContent className="p-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Tags</p>
+              <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Tags</p>
               <TagManager
                 tags={lead.tags || []}
                 onAdd={handleAddTag}
@@ -286,16 +286,16 @@ export default function LeadDetailPage() {
         </div>
 
         {/* Payment Section */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="neon-card">
           <CardContent className="p-4 flex items-center gap-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Payment</p>
+            <p className="text-xs text-white/30 uppercase tracking-wider">Payment</p>
             {isPaid ? (
               <>
-                <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30">
+                <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30 uppercase tracking-wider text-xs font-semibold">
                   Paid
                 </Badge>
                 {lead.paidAt && (
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-white/40">
                     {format(new Date(lead.paidAt), 'MMM d, yyyy')}
                   </span>
                 )}
@@ -312,21 +312,21 @@ export default function LeadDetailPage() {
               </>
             ) : lead.status === 'FAILED' ? (
               <>
-                <Badge variant="outline" className="bg-red-500/20 text-red-300 border-red-500/30">
+                <Badge variant="outline" className="bg-red-500/20 text-red-300 border-red-500/30 uppercase tracking-wider text-xs font-semibold">
                   Failed
                 </Badge>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={handleRetryPayment}
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  className="border-white/[0.12] text-white/60 hover:bg-white/[0.06]"
                 >
                   Retry Payment
                 </Button>
               </>
             ) : (
               <>
-                <Badge variant="outline" className="bg-gray-500/20 text-gray-300 border-gray-500/30">
+                <Badge variant="outline" className="bg-gray-500/20 text-white/60 border-gray-500/30 uppercase tracking-wider text-xs font-semibold">
                   Unpaid
                 </Badge>
                 {lead.status === 'INFO_COLLECTED' && (
@@ -334,7 +334,7 @@ export default function LeadDetailPage() {
                     size="sm"
                     variant="outline"
                     onClick={handleRetryPayment}
-                    className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                    className="border-white/[0.12] text-white/60 hover:bg-white/[0.06]"
                   >
                     Send Payment Link
                   </Button>
@@ -347,7 +347,7 @@ export default function LeadDetailPage() {
         {/* Two-Column Layout: Activity + SMS */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left: Activity Timeline + Notes */}
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardHeader>
               <CardTitle className="text-lg">Activity</CardTitle>
             </CardHeader>
@@ -361,7 +361,7 @@ export default function LeadDetailPage() {
                     if (e.key === 'Enter') handleAddNote();
                   }}
                   placeholder="Add a note..."
-                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                  className="bg-white/[0.04] border-white/[0.12] text-white placeholder:text-white/30"
                 />
                 <Button
                   onClick={handleAddNote}
@@ -375,21 +375,21 @@ export default function LeadDetailPage() {
               {/* Timeline */}
               <div className="space-y-3 max-h-[400px] overflow-y-auto">
                 {activities.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">No activity yet</p>
+                  <p className="text-sm text-white/30 text-center py-4">No activity yet</p>
                 ) : (
                   activities.map((activity) => (
                     <div
                       key={activity.id}
-                      className="flex items-start gap-3 p-3 rounded-lg bg-gray-800/50 border border-gray-700/50"
+                      className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.04] border border-white/[0.08]"
                     >
                       <span className="text-lg shrink-0">
                         {ACTIVITY_ICONS[activity.type] || '📋'}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-300">{activity.content}</p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-sm text-white/60">{activity.content}</p>
+                        <p className="text-xs text-white/30 mt-1">
                           {activity.createdBy !== 'system' && (
-                            <span className="text-gray-400">{activity.createdBy} &middot; </span>
+                            <span className="text-white/40">{activity.createdBy} &middot; </span>
                           )}
                           {formatDistanceToNow(new Date(activity.createdAt), {
                             addSuffix: true,
@@ -398,7 +398,7 @@ export default function LeadDetailPage() {
                       </div>
                       <Badge
                         variant="outline"
-                        className="text-xs bg-gray-700/50 text-gray-400 border-gray-600 shrink-0"
+                        className="text-xs bg-white/[0.04] text-white/40 border-white/[0.12] shrink-0 uppercase tracking-wider font-semibold"
                       >
                         {activity.type.replaceAll('_', ' ')}
                       </Badge>
@@ -410,7 +410,7 @@ export default function LeadDetailPage() {
           </Card>
 
           {/* Right: SMS Conversation */}
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="neon-card">
             <CardHeader>
               <CardTitle className="text-lg">SMS Conversation</CardTitle>
             </CardHeader>
@@ -418,7 +418,7 @@ export default function LeadDetailPage() {
               {/* Messages */}
               <div className="space-y-3 max-h-[400px] overflow-y-auto">
                 {smsMessages.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">No messages yet</p>
+                  <p className="text-sm text-white/30 text-center py-4">No messages yet</p>
                 ) : (
                   smsMessages.map((msg) => (
                     <div
@@ -429,7 +429,7 @@ export default function LeadDetailPage() {
                         className={`max-w-[80%] rounded-lg p-3 ${
                           msg.direction === 'OUT'
                             ? 'bg-blue-600/30 text-blue-100 border border-blue-500/30'
-                            : 'bg-gray-800 text-gray-300 border border-gray-700'
+                            : 'bg-white/[0.04] text-white/60 border border-white/[0.12]'
                         }`}
                       >
                         <p className="text-sm">{msg.body}</p>
@@ -455,7 +455,7 @@ export default function LeadDetailPage() {
                     }
                   }}
                   placeholder="Type a message..."
-                  className="flex-1 bg-gray-800 border border-gray-700 rounded-md p-2 text-sm text-white placeholder:text-gray-500 resize-none"
+                  className="flex-1 bg-white/[0.04] border border-white/[0.12] rounded-md p-2 text-sm text-white placeholder:text-white/30 resize-none"
                   rows={2}
                 />
                 <Button
@@ -471,20 +471,20 @@ export default function LeadDetailPage() {
         </div>
 
         {/* Drip Enrollments */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="neon-card">
           <CardHeader>
             <CardTitle className="text-lg">
-              Drip Enrollments ({lead.dripEnrollments?.length || 0})
+              Drip Enrollments (<span className="mono-num">{lead.dripEnrollments?.length || 0}</span>)
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow className="border-gray-800">
-                  <TableHead className="text-gray-400">Sequence</TableHead>
-                  <TableHead className="text-gray-400">Current Step</TableHead>
-                  <TableHead className="text-gray-400">Status</TableHead>
-                  <TableHead className="text-gray-400">Actions</TableHead>
+                <TableRow className="border-white/[0.08]">
+                  <TableHead className="text-white/40">Sequence</TableHead>
+                  <TableHead className="text-white/40">Current Step</TableHead>
+                  <TableHead className="text-white/40">Status</TableHead>
+                  <TableHead className="text-white/40">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -492,7 +492,7 @@ export default function LeadDetailPage() {
                   <TableRow>
                     <TableCell
                       colSpan={4}
-                      className="text-center text-gray-500 py-6"
+                      className="text-center text-white/30 py-6"
                     >
                       No enrollments
                     </TableCell>
@@ -501,16 +501,16 @@ export default function LeadDetailPage() {
                   lead.dripEnrollments.map((e) => (
                     <TableRow
                       key={e.id}
-                      className="border-gray-800 hover:bg-gray-800/50"
+                      className="border-white/[0.08] hover:bg-white/[0.04]"
                     >
                       <TableCell className="font-medium">
                         {e.sequence.name}
                       </TableCell>
-                      <TableCell>Step {e.currentStep}</TableCell>
+                      <TableCell className="mono-num">Step {e.currentStep}</TableCell>
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={ENROLLMENT_COLORS[e.status] || ''}
+                          className={`uppercase tracking-wider text-xs font-semibold ${ENROLLMENT_COLORS[e.status] || ''}`}
                         >
                           {e.status}
                         </Badge>

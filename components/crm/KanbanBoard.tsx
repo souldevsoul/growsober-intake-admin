@@ -52,18 +52,18 @@ export function KanbanBoard({ leads, onStatusChange }: KanbanBoardProps) {
         {COLUMNS.map((status) => (
           <div
             key={status}
-            className="flex-shrink-0 w-64 bg-gray-900 border border-gray-800 rounded-lg flex flex-col"
+            className="flex-shrink-0 w-64 bg-black border border-white/[0.15] rounded-lg flex flex-col"
           >
             {/* Column Header */}
-            <div className="p-3 border-b border-gray-800 flex items-center justify-between">
-              <span className="text-sm font-semibold text-gray-200">
+            <div className="p-3 border-b border-white/[0.08] flex items-center justify-between">
+              <span className="text-sm font-semibold text-white/80">
                 {formatStatus(status)}
               </span>
               <Badge
                 variant="outline"
-                className={`text-xs ${STATUS_COLORS[status] || ''}`}
+                className={`text-xs uppercase tracking-wider font-semibold ${STATUS_COLORS[status] || ''}`}
               >
-                {columnData[status].length}
+                <span className="mono-num">{columnData[status].length}</span>
               </Badge>
             </div>
 
@@ -74,7 +74,7 @@ export function KanbanBoard({ leads, onStatusChange }: KanbanBoardProps) {
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={`flex-1 p-2 space-y-2 min-h-[120px] transition-colors ${
-                    snapshot.isDraggingOver ? 'bg-gray-800/50' : ''
+                    snapshot.isDraggingOver ? 'bg-white/[0.04]' : ''
                   }`}
                 >
                   {columnData[status].map((lead, index) => (
@@ -88,22 +88,22 @@ export function KanbanBoard({ leads, onStatusChange }: KanbanBoardProps) {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className={`bg-gray-800 border border-gray-700 rounded p-3 space-y-1.5 transition-shadow ${
+                          className={`bg-white/[0.04] border border-white/[0.12] rounded p-3 space-y-1.5 transition-shadow ${
                             snapshot.isDragging
                               ? 'shadow-lg shadow-black/50 ring-1 ring-blue-500/40'
-                              : 'hover:border-gray-600'
+                              : 'hover:border-white/[0.20]'
                           }`}
                         >
                           <div className="text-sm font-medium text-white truncate">
                             {lead.name || 'Unknown'}
                           </div>
-                          <div className="text-xs text-gray-400 font-mono">
+                          <div className="text-xs text-white/40 font-mono">
                             {lead.phone}
                           </div>
                           {lead.tags && lead.tags.length > 0 && (
                             <Badge
                               variant="outline"
-                              className="text-[10px] bg-gray-700/50 text-gray-300 border-gray-600"
+                              className="text-[10px] bg-white/[0.04] text-white/60 border-white/[0.12] uppercase tracking-wider font-semibold"
                             >
                               {lead.tags[0]}
                             </Badge>

@@ -132,7 +132,7 @@ test.describe('Cohorts Page', () => {
 test.describe('Full Navigation with New Pages', () => {
   test('navigate through all CRM sections including new ones', async ({ page }) => {
     await page.goto('/crm');
-    await expect(page.getByRole('heading', { name: 'CRM Leads' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Leads' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Cohorts' }).click();
     await expect(page.getByRole('heading', { name: 'Cohorts' })).toBeVisible();
@@ -143,10 +143,10 @@ test.describe('Full Navigation with New Pages', () => {
     await page.getByRole('link', { name: 'Scheduled' }).click();
     await expect(page.getByRole('heading', { name: 'Scheduled Messages' })).toBeVisible();
 
-    await page.getByRole('link', { name: 'Drip Sequences' }).click();
-    await expect(page.getByRole('heading', { name: 'Drip Sequences' })).toBeVisible();
+    await page.getByRole('link', { name: 'Sequences' }).click();
+    await expect(page.getByRole('heading', { name: 'Sequences' })).toBeVisible();
 
-    await page.getByRole('link', { name: 'CRM Leads' }).click();
-    await expect(page.getByRole('heading', { name: 'CRM Leads' })).toBeVisible();
+    await page.getByRole('link', { name: 'Leads' }).click();
+    await expect(page.getByRole('heading', { name: 'Leads' })).toBeVisible();
   });
 });

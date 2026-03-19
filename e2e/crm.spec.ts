@@ -26,33 +26,33 @@ test.describe('Sidebar Navigation', () => {
     await page.goto('/crm');
     const sidebar = page.locator('aside');
     await expect(sidebar.getByText('Dashboard')).toBeVisible();
-    await expect(sidebar.getByText('CRM Leads')).toBeVisible();
-    await expect(sidebar.getByText('Drip Sequences')).toBeVisible();
+    await expect(sidebar.getByText('Leads')).toBeVisible();
+    await expect(sidebar.getByText('Sequences')).toBeVisible();
     await expect(sidebar.getByText('Scheduled')).toBeVisible();
   });
 
   test('navigates to each section', async ({ page }) => {
     await page.goto('/crm');
 
-    await page.getByRole('link', { name: 'Drip Sequences' }).click();
+    await page.getByRole('link', { name: 'Sequences' }).click();
     await expect(page).toHaveURL(/\/crm\/sequences/);
-    await expect(page.getByRole('heading', { name: 'Drip Sequences' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sequences' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Scheduled' }).click();
     await expect(page).toHaveURL(/\/crm\/scheduled/);
     await expect(page.getByRole('heading', { name: 'Scheduled Messages' })).toBeVisible();
 
-    await page.getByRole('link', { name: 'CRM Leads' }).click();
+    await page.getByRole('link', { name: 'Leads' }).click();
     await expect(page).toHaveURL(/\/crm$/);
-    await expect(page.getByRole('heading', { name: 'CRM Leads' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Leads' })).toBeVisible();
   });
 });
 
 // ===========================================================================
-// 2. CRM Leads – Table View
+// 2. Leads – Table View
 // ===========================================================================
 
-test.describe('CRM Leads – Table View', () => {
+test.describe('Leads – Table View', () => {
   test('loads leads with correct columns', async ({ page }) => {
     await goToCrm(page);
 
@@ -124,10 +124,10 @@ test.describe('CRM Leads – Table View', () => {
 });
 
 // ===========================================================================
-// 3. CRM Leads – Pipeline / Kanban View
+// 3. Leads – Pipeline / Kanban View
 // ===========================================================================
 
-test.describe('CRM Leads – Pipeline View', () => {
+test.describe('Leads – Pipeline View', () => {
   test('toggle switches between Table and Pipeline', async ({ page }) => {
     await goToCrm(page);
 
@@ -397,14 +397,14 @@ test.describe('Scheduled Messages Page', () => {
 });
 
 // ===========================================================================
-// 7. Drip Sequences Page
+// 7. Sequences Page
 // ===========================================================================
 
-test.describe('Drip Sequences Page', () => {
+test.describe('Sequences Page', () => {
   test('loads sequences list', async ({ page }) => {
     await page.goto('/crm/sequences');
     await expect(
-      page.getByRole('heading', { name: 'Drip Sequences' }),
+      page.getByRole('heading', { name: 'Sequences' }),
     ).toBeVisible();
 
     // Should have at least the "Founding Crew Welcome" sequence
@@ -467,13 +467,13 @@ test.describe('Cross-page Flows', () => {
   });
 
   test('full navigation cycle through all pages', async ({ page }) => {
-    // CRM Leads
+    // Leads
     await page.goto('/crm');
-    await expect(page.getByRole('heading', { name: 'CRM Leads' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Leads' })).toBeVisible();
 
     // Sequences
-    await page.getByRole('link', { name: 'Drip Sequences' }).click();
-    await expect(page.getByRole('heading', { name: 'Drip Sequences' })).toBeVisible();
+    await page.getByRole('link', { name: 'Sequences' }).click();
+    await expect(page.getByRole('heading', { name: 'Sequences' })).toBeVisible();
 
     // Scheduled
     await page.getByRole('link', { name: 'Scheduled' }).click();
@@ -484,7 +484,7 @@ test.describe('Cross-page Flows', () => {
     await expect(page).toHaveURL(/\/$/);
 
     // Back to CRM
-    await page.getByRole('link', { name: 'CRM Leads' }).click();
+    await page.getByRole('link', { name: 'Leads' }).click();
     await expect(page).toHaveURL(/\/crm$/);
   });
 });

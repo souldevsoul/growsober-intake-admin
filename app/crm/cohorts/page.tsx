@@ -29,7 +29,7 @@ import {
 import { Check, X, HelpCircle, MapPin, Calendar, Users, Loader2 } from 'lucide-react';
 
 const STATUS_COLORS: Record<string, string> = {
-  DRAFT: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
+  DRAFT: 'bg-gray-500/20 text-white/60 border-gray-500/30',
   CONFIRMED: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
   INVITED: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
   EVENT_CREATED: 'bg-green-500/20 text-green-300 border-green-500/30',
@@ -42,7 +42,7 @@ const STATUSES = ['DRAFT', 'CONFIRMED', 'INVITED', 'EVENT_CREATED', 'COMPLETED',
 function RsvpIcon({ status }: { status: string }) {
   if (status === 'CONFIRMED') return <Check className="w-3 h-3 text-green-400" />;
   if (status === 'DECLINED' || status === 'CANCELLED') return <X className="w-3 h-3 text-red-400" />;
-  return <HelpCircle className="w-3 h-3 text-gray-500" />;
+  return <HelpCircle className="w-3 h-3 text-white/30" />;
 }
 
 export default function CohortsPage() {
@@ -130,22 +130,22 @@ export default function CohortsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <div className="min-h-screen bg-black neon-grid-bg text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">Cohorts</h1>
-            <Badge variant="secondary" className="bg-gray-800 text-gray-300">
+            <Badge variant="secondary" className="bg-white/[0.04] text-white/60 mono-num">
               {total}
             </Badge>
           </div>
           <div className="flex items-center gap-3">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="bg-gray-900 border-gray-800 text-white w-[180px]">
+              <SelectTrigger className="bg-black border-white/[0.15] text-white w-[180px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-800">
+              <SelectContent className="bg-black border-white/[0.15]">
                 <SelectItem value="all">All statuses</SelectItem>
                 {STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
@@ -165,12 +165,12 @@ export default function CohortsPage() {
 
         {/* Generate Form */}
         {showGenerateForm && (
-          <div className="flex items-center gap-3 p-4 bg-gray-900 rounded-lg border border-gray-800">
+          <div className="flex items-center gap-3 p-4 neon-card">
             <Input
               placeholder="City filter (optional)"
               value={generateCity}
               onChange={(e) => setGenerateCity(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white max-w-xs"
+              className="bg-white/[0.04] border-white/[0.12] text-white max-w-xs"
             />
             <Button
               onClick={handleGenerate}
@@ -189,7 +189,7 @@ export default function CohortsPage() {
             <Button
               variant="ghost"
               onClick={() => { setShowGenerateForm(false); setGenerateCity(''); }}
-              className="text-gray-400"
+              className="text-white/40"
             >
               Cancel
             </Button>
@@ -198,9 +198,9 @@ export default function CohortsPage() {
 
         {/* Cohort Cards */}
         {loading ? (
-          <p className="text-gray-500 text-center py-8">Loading...</p>
+          <p className="text-white/30 text-center py-8">Loading...</p>
         ) : cohorts.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">
+          <p className="text-white/30 text-center py-8">
             No cohorts found. Generate some to get started.
           </p>
         ) : (
@@ -208,7 +208,7 @@ export default function CohortsPage() {
             {cohorts.map((cohort) => (
               <div
                 key={cohort.id}
-                className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors cursor-pointer"
+                className="bg-black border border-white/[0.15] rounded-lg p-4 hover:border-white/[0.25] transition-colors cursor-pointer"
                 onClick={() => router.push(`/crm/cohorts/${cohort.id}`)}
               >
                 <div className="flex items-start justify-between">
@@ -218,19 +218,19 @@ export default function CohortsPage() {
                     <div className="flex items-center gap-3 flex-wrap">
                       <h3 className="font-semibold text-white text-lg">{cohort.name}</h3>
                       {cohort.city && (
-                        <span className="text-sm text-gray-400">{cohort.city}</span>
+                        <span className="text-sm text-white/40">{cohort.city}</span>
                       )}
                       <Badge
                         variant="outline"
-                        className={STATUS_COLORS[cohort.status] || ''}
+                        className={`uppercase tracking-wider text-xs font-semibold ${STATUS_COLORS[cohort.status] || ''}`}
                       >
                         {cohort.status.replace('_', ' ')}
                       </Badge>
                     </div>
 
                     {/* Member count + event info */}
-                    <div className="flex items-center gap-4 text-sm text-gray-400">
-                      <span className="flex items-center gap-1">
+                    <div className="flex items-center gap-4 text-sm text-white/40">
+                      <span className="flex items-center gap-1 mono-num">
                         <Users className="w-4 h-4" />
                         {cohort.members?.length || 0} members
                       </span>
@@ -254,7 +254,7 @@ export default function CohortsPage() {
                         {cohort.members.map((member) => (
                           <span
                             key={member.id}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-800 text-xs text-gray-300"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.04] text-xs text-white/60"
                           >
                             {member.lead?.name || 'Unknown'}
                             <RsvpIcon status={member.rsvpStatus} />
@@ -266,40 +266,40 @@ export default function CohortsPage() {
                     {/* Inline confirm form */}
                     {confirmingId === cohort.id && (
                       <div
-                        className="flex items-end gap-3 mt-2 p-3 bg-gray-800 rounded-lg"
+                        className="flex items-end gap-3 mt-2 p-3 bg-white/[0.04] rounded-lg"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div>
-                          <label className="text-xs text-gray-400 mb-1 block">
+                          <label className="text-xs text-white/40 mb-1 block">
                             Event Date *
                           </label>
                           <Input
                             type="datetime-local"
                             value={confirmDate}
                             onChange={(e) => setConfirmDate(e.target.value)}
-                            className="bg-gray-700 border-gray-600 text-white w-52"
+                            className="bg-white/[0.04] border-white/[0.12] text-white w-52"
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-gray-400 mb-1 block">
+                          <label className="text-xs text-white/40 mb-1 block">
                             Location
                           </label>
                           <Input
                             value={confirmLocation}
                             onChange={(e) => setConfirmLocation(e.target.value)}
                             placeholder="e.g. Coffee shop on Main St"
-                            className="bg-gray-700 border-gray-600 text-white w-56"
+                            className="bg-white/[0.04] border-white/[0.12] text-white w-56"
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-gray-400 mb-1 block">
+                          <label className="text-xs text-white/40 mb-1 block">
                             Notes
                           </label>
                           <Input
                             value={confirmNotes}
                             onChange={(e) => setConfirmNotes(e.target.value)}
                             placeholder="Optional notes"
-                            className="bg-gray-700 border-gray-600 text-white w-48"
+                            className="bg-white/[0.04] border-white/[0.12] text-white w-48"
                           />
                         </div>
                         <Button
@@ -323,7 +323,7 @@ export default function CohortsPage() {
                             setConfirmLocation('');
                             setConfirmNotes('');
                           }}
-                          className="text-gray-400"
+                          className="text-white/40"
                         >
                           Cancel
                         </Button>
@@ -401,7 +401,7 @@ export default function CohortsPage() {
                               sendCohortReminders(cohort.id)
                             )
                           }
-                          className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                          className="border-white/[0.12] text-white/60 hover:bg-white/[0.06]"
                           disabled={actionLoading === cohort.id}
                         >
                           Send Reminders
@@ -431,7 +431,7 @@ export default function CohortsPage() {
                               sendCohortReminders(cohort.id)
                             )
                           }
-                          className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                          className="border-white/[0.12] text-white/60 hover:bg-white/[0.06]"
                           disabled={actionLoading === cohort.id}
                         >
                           Send Reminders
@@ -454,7 +454,7 @@ export default function CohortsPage() {
                     )}
 
                     {actionLoading === cohort.id && cohort.status !== 'DRAFT' && (
-                      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                      <Loader2 className="w-4 h-4 animate-spin text-white/40" />
                     )}
                   </div>
                 </div>

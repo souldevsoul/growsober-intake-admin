@@ -118,18 +118,18 @@ export default function SequenceDetailPage() {
     fetchSequence();
   };
 
-  if (loading) return <div className="min-h-screen bg-gray-950 text-white p-6"><p className="text-gray-500">Loading...</p></div>;
-  if (!sequence) return <div className="min-h-screen bg-gray-950 text-white p-6"><p className="text-gray-500">Sequence not found</p></div>;
+  if (loading) return <div className="min-h-screen bg-black neon-grid-bg text-white p-6"><p className="text-white/30">Loading...</p></div>;
+  if (!sequence) return <div className="min-h-screen bg-black neon-grid-bg text-white p-6"><p className="text-white/30">Sequence not found</p></div>;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <div className="min-h-screen bg-black neon-grid-bg text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={() => router.push('/crm/sequences')}
-            className="text-gray-400"
+            className="text-white/40"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back
@@ -137,19 +137,19 @@ export default function SequenceDetailPage() {
           <div className="flex-1">
             <h1 className="text-2xl font-bold">{sequence.name}</h1>
             {sequence.description && (
-              <p className="text-gray-400 mt-1">{sequence.description}</p>
+              <p className="text-white/40 mt-1">{sequence.description}</p>
             )}
           </div>
-          <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+          <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/30 uppercase tracking-wider text-xs font-semibold">
             {TRIGGER_LABELS[sequence.trigger] || sequence.trigger}
             {sequence.triggerValue && `: ${sequence.triggerValue}`}
           </Badge>
           <button
             onClick={handleToggleActive}
-            className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded text-sm font-medium uppercase tracking-wider transition-colors ${
               sequence.isActive
                 ? 'bg-green-500/20 text-green-300 hover:bg-green-500/30'
-                : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                : 'bg-white/[0.04] text-white/40 hover:bg-white/[0.06]'
             }`}
           >
             {sequence.isActive ? 'Active' : 'Inactive'}
@@ -157,24 +157,24 @@ export default function SequenceDetailPage() {
         </div>
 
         {/* Steps */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="neon-card">
           <CardHeader>
-            <CardTitle className="text-lg">Steps ({sequence.steps.length})</CardTitle>
+            <CardTitle className="text-lg">Steps (<span className="mono-num">{sequence.steps.length}</span>)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {sequence.steps.map((step) => (
               <div
                 key={step.id}
-                className="flex items-start gap-4 p-3 rounded-lg bg-gray-800/50 border border-gray-700/50"
+                className="flex items-start gap-4 p-3 rounded-lg bg-white/[0.04] border border-white/[0.08]"
               >
                 <div className="flex items-center gap-2 shrink-0 pt-1">
-                  <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-300 flex items-center justify-center text-xs font-bold">
+                  <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-300 flex items-center justify-center text-xs font-bold mono-num">
                     {step.stepNumber}
                   </span>
-                  <Badge variant="outline" className="text-xs bg-gray-700/50 text-gray-300 border-gray-600">
+                  <Badge variant="outline" className="text-xs bg-white/[0.04] text-white/60 border-white/[0.12] uppercase tracking-wider font-semibold">
                     {formatDelay(step.delayMinutes)}
                   </Badge>
-                  <Badge variant="outline" className="text-xs bg-gray-700/50 text-gray-300 border-gray-600">
+                  <Badge variant="outline" className="text-xs bg-white/[0.04] text-white/60 border-white/[0.12] uppercase tracking-wider font-semibold">
                     {step.channel}
                   </Badge>
                 </div>
@@ -184,27 +184,27 @@ export default function SequenceDetailPage() {
                       <textarea
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm text-white resize-none"
+                        className="w-full bg-black border border-white/[0.12] rounded p-2 text-sm text-white resize-none"
                         rows={3}
                       />
                       <div className="flex items-center gap-2">
-                        <label className="text-xs text-gray-400">Delay (min):</label>
+                        <label className="text-xs text-white/40">Delay (min):</label>
                         <Input
                           value={editDelay}
                           onChange={(e) => setEditDelay(e.target.value)}
-                          className="w-24 h-7 bg-gray-900 border-gray-700 text-white text-xs"
+                          className="w-24 h-7 bg-black border-white/[0.12] text-white text-xs"
                           type="number"
                         />
                         <Button size="sm" className="h-7 text-xs" onClick={() => handleUpdateStep(step.id)}>
                           Save
                         </Button>
-                        <Button size="sm" variant="ghost" className="h-7 text-xs text-gray-400" onClick={() => setEditingStep(null)}>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-white/40" onClick={() => setEditingStep(null)}>
                           Cancel
                         </Button>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-300 whitespace-pre-wrap">{step.content}</p>
+                    <p className="text-sm text-white/60 whitespace-pre-wrap">{step.content}</p>
                   )}
                 </div>
                 {editingStep !== step.id && (
@@ -212,7 +212,7 @@ export default function SequenceDetailPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 text-xs text-gray-400"
+                      className="h-7 text-xs text-white/40"
                       onClick={() => {
                         setEditingStep(step.id);
                         setEditContent(step.content);
@@ -235,25 +235,25 @@ export default function SequenceDetailPage() {
             ))}
 
             {/* Add Step */}
-            <div className="p-3 rounded-lg border border-dashed border-gray-700 space-y-3">
-              <p className="text-sm text-gray-400 font-medium">Add Step</p>
+            <div className="p-3 rounded-lg border border-dashed border-white/[0.12] space-y-3">
+              <p className="text-sm text-white/40 font-medium">Add Step</p>
               <div className="flex gap-3">
                 <div>
-                  <label className="text-xs text-gray-500 block mb-1">Delay (minutes)</label>
+                  <label className="text-xs text-white/30 block mb-1">Delay (minutes)</label>
                   <Input
                     value={newDelay}
                     onChange={(e) => setNewDelay(e.target.value)}
                     type="number"
-                    className="w-28 bg-gray-800 border-gray-700 text-white"
+                    className="w-28 bg-white/[0.04] border-white/[0.12] text-white"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 block mb-1">Channel</label>
+                  <label className="text-xs text-white/30 block mb-1">Channel</label>
                   <Select value={newChannel} onValueChange={setNewChannel}>
-                    <SelectTrigger className="w-24 bg-gray-800 border-gray-700 text-white">
+                    <SelectTrigger className="w-24 bg-white/[0.04] border-white/[0.12] text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-900 border-gray-800">
+                    <SelectContent className="bg-black border-white/[0.15]">
                       <SelectItem value="SMS">SMS</SelectItem>
                       <SelectItem value="EMAIL">Email</SelectItem>
                     </SelectContent>
@@ -261,14 +261,14 @@ export default function SequenceDetailPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs text-gray-500 block mb-1">
+                <label className="text-xs text-white/30 block mb-1">
                   Content (use {'{{name}}'}, {'{{city}}'}, {'{{interests}}'} placeholders)
                 </label>
                 <textarea
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
                   placeholder="Hey {{name}}! Welcome to the founding crew..."
-                  className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-white resize-none placeholder:text-gray-500"
+                  className="w-full bg-white/[0.04] border border-white/[0.12] rounded p-2 text-sm text-white resize-none placeholder:text-white/30"
                   rows={3}
                 />
               </div>
@@ -280,45 +280,45 @@ export default function SequenceDetailPage() {
         </Card>
 
         {/* Enrollments */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="neon-card">
           <CardHeader>
             <CardTitle className="text-lg">
-              Enrollments ({sequence.enrollments?.length || 0})
+              Enrollments (<span className="mono-num">{sequence.enrollments?.length || 0}</span>)
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow className="border-gray-800">
-                  <TableHead className="text-gray-400">Name</TableHead>
-                  <TableHead className="text-gray-400">Phone</TableHead>
-                  <TableHead className="text-gray-400">Step</TableHead>
-                  <TableHead className="text-gray-400">Status</TableHead>
-                  <TableHead className="text-gray-400">Enrolled</TableHead>
-                  <TableHead className="text-gray-400">Actions</TableHead>
+                <TableRow className="border-white/[0.08]">
+                  <TableHead className="text-white/40">Name</TableHead>
+                  <TableHead className="text-white/40">Phone</TableHead>
+                  <TableHead className="text-white/40">Step</TableHead>
+                  <TableHead className="text-white/40">Status</TableHead>
+                  <TableHead className="text-white/40">Enrolled</TableHead>
+                  <TableHead className="text-white/40">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {!sequence.enrollments?.length ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-gray-500 py-6">
+                    <TableCell colSpan={6} className="text-center text-white/30 py-6">
                       No enrollments yet
                     </TableCell>
                   </TableRow>
                 ) : (
                   sequence.enrollments.map((e) => (
-                    <TableRow key={e.id} className="border-gray-800 hover:bg-gray-800/50">
+                    <TableRow key={e.id} className="border-white/[0.08] hover:bg-white/[0.04]">
                       <TableCell className="font-medium">{e.lead.name || '-'}</TableCell>
                       <TableCell className="font-mono text-sm">{e.lead.phone}</TableCell>
-                      <TableCell>
+                      <TableCell className="mono-num">
                         {e.currentStep} / {sequence.steps.length}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={ENROLLMENT_COLORS[e.status] || ''}>
+                        <Badge variant="outline" className={`uppercase tracking-wider text-xs font-semibold ${ENROLLMENT_COLORS[e.status] || ''}`}>
                           {e.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-gray-400 text-sm">
+                      <TableCell className="text-white/40 text-sm">
                         {formatDistanceToNow(new Date(e.createdAt), { addSuffix: true })}
                       </TableCell>
                       <TableCell>

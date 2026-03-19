@@ -27,7 +27,7 @@ export function TagManager({ tags, onAdd, onRemove }: TagManagerProps) {
       {tags.map((tag) => (
         <span
           key={tag}
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider font-semibold"
         >
           {tag}
           <button
@@ -43,7 +43,7 @@ export function TagManager({ tags, onAdd, onRemove }: TagManagerProps) {
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Add tag..."
-        className="w-24 h-6 text-xs bg-transparent border-gray-700 px-2"
+        className="w-24 h-6 text-xs bg-transparent border-white/[0.12] px-2"
       />
     </div>
   );
