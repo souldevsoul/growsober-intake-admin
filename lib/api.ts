@@ -372,3 +372,166 @@ export async function deleteSegment(id: string) {
   const { data } = await crmApi.delete(`/segments/${id}`);
   return data;
 }
+
+// ============================================================================
+// CRM API — Automations
+// ============================================================================
+
+export interface CrmAutomation {
+  id: string;
+  name: string;
+  trigger: string;
+  triggerConfig: Record<string, unknown> | null;
+  channel: string;
+  messageTemplate: string;
+  isActive: boolean;
+  _count?: { logs: number };
+  createdAt: string;
+}
+
+export interface AutomationLog {
+  id: string;
+  automationId: string;
+  automation?: { name: string; trigger: string };
+  leadId: string | null;
+  trigger: string;
+  channel: string;
+  renderedMessage: string;
+  status: 'SENT' | 'FAILED';
+  error: string | null;
+  createdAt: string;
+}
+
+export async function getAutomations(): Promise<CrmAutomation[]> {
+  const { data } = await crmApi.get('/automations');
+  return data.data || data;
+}
+
+export async function createAutomation(dto: { name: string; trigger: string; triggerConfig?: Record<string, unknown>; channel: string; messageTemplate: string; isActive?: boolean }): Promise<CrmAutomation> {
+  const { data } = await crmApi.post('/automations', dto);
+  return data.data || data;
+}
+
+export async function updateAutomation(id: string, dto: { name?: string; triggerConfig?: Record<string, unknown>; channel?: string; messageTemplate?: string; isActive?: boolean }): Promise<CrmAutomation> {
+  const { data } = await crmApi.patch(`/automations/${id}`, dto);
+  return data.data || data;
+}
+
+export async function deleteAutomation(id: string) {
+  const { data } = await crmApi.delete(`/automations/${id}`);
+  return data.data || data;
+}
+
+export async function getAutomationLogs(params?: Record<string, string>): Promise<{ data: AutomationLog[]; meta: { total: number; page: number; limit: number; pages: number } }> {
+  const { data } = await crmApi.get('/automation-logs', { params });
+  const inner = data.data || data;
+  if (Array.isArray(inner)) return { data: inner, meta: { total: inner.length, page: 1, limit: 50, pages: 1 } };
+  return { data: inner.data || [], meta: inner.meta || { total: 0, page: 1, limit: 50, pages: 1 } };
+}
+
+// ============================================================================
+// CRM API — Cohorts
+// ============================================================================
+
+export interface CohortMember {
+  id: string;
+  cohortId: string;
+  leadId: string;
+  lead: { id: string; name: string | null; phone: string; city?: string | null; interests?: string[]; sobrietyStatus?: string | null };
+  rsvpStatus: 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'CANCELLED';
+  rsvpAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  reminderSent: boolean;
+  attended: boolean;
+}
+
+export interface Cohort {
+  id: string;
+  name: string;
+  status: 'DRAFT' | 'CONFIRMED' | 'INVITED' | 'EVENT_CREATED' | 'COMPLETED' | 'CANCELLED';
+  city: string | null;
+  hubId: string | null;
+  hub: { id: string; name: string } | null;
+  eventId: string | null;
+  event: { id: string; title: string; startDate: string; status: string; locationName?: string } | null;
+  eventDate: string | null;
+  eventLocation: string | null;
+  eventNotes: string | null;
+  invitedAt: string | null;
+  reminderSentAt: string | null;
+  members: CohortMember[];
+  createdAt: string;
+}
+
+export async function generateCohorts(params?: { city?: string; minSize?: number; maxSize?: number }): Promise<Cohort[]> {
+  const { data } = await crmApi.post('/cohorts/generate', params || {});
+  return data.data || data;
+}
+
+export async function getCohorts(params?: Record<string, string>): Promise<{ data: Cohort[]; meta: { total: number; page: number; limit: number; pages: number } }> {
+  const { data } = await crmApi.get('/cohorts', { params });
+  const inner = data.data || data;
+  if (Array.isArray(inner)) return { data: inner, meta: { total: inner.length, page: 1, limit: 50, pages: 1 } };
+  return { data: inner.data || [], meta: inner.meta || { total: 0, page: 1, limit: 50, pages: 1 } };
+}
+
+export async function getCohort(id: string): Promise<Cohort> {
+  const { data } = await crmApi.get(`/cohorts/${id}`);
+  return data.data || data;
+}
+
+export async function confirmCohort(id: string, dto: { eventDate: string; eventLocation?: string; eventNotes?: string }): Promise<Cohort> {
+  const { data } = await crmApi.post(`/cohorts/${id}/confirm`, dto);
+  return data.data || data;
+}
+
+export async function sendCohortInvitations(id: string): Promise<Cohort> {
+  const { data } = await crmApi.post(`/cohorts/${id}/invite`);
+  return data.data || data;
+}
+
+export async function createCohortEvent(id: string): Promise<Cohort> {
+  const { data } = await crmApi.post(`/cohorts/${id}/create-event`);
+  return data.data || data;
+}
+
+export async function sendCohortReminders(id: string): Promise<Cohort> {
+  const { data } = await crmApi.post(`/cohorts/${id}/send-reminders`);
+  return data.data || data;
+}
+
+export async function completeCohort(id: string) {
+  const { data } = await crmApi.post(`/cohorts/${id}/complete`);
+  return data.data || data;
+}
+
+export async function cancelCohort(id: string) {
+  const { data } = await crmApi.post(`/cohorts/${id}/cancel`);
+  return data.data || data;
+}
+
+export async function deleteCohort(id: string) {
+  const { data } = await crmApi.delete(`/cohorts/${id}`);
+  return data.data || data;
+}
+
+export async function addCohortMember(cohortId: string, leadId: string) {
+  const { data } = await crmApi.post(`/cohorts/${cohortId}/members`, { leadId });
+  return data.data || data;
+}
+
+export async function removeCohortMember(cohortId: string, memberId: string) {
+  const { data } = await crmApi.delete(`/cohorts/${cohortId}/members/${memberId}`);
+  return data.data || data;
+}
+
+export async function updateMemberRsvp(memberId: string, rsvpStatus: string, cancelReason?: string) {
+  const { data } = await crmApi.patch(`/cohort-members/${memberId}/rsvp`, { rsvpStatus, cancelReason });
+  return data.data || data;
+}
+
+export async function markMemberAttendance(memberId: string, attended: boolean) {
+  const { data } = await crmApi.patch(`/cohort-members/${memberId}/attendance`, { attended });
+  return data.data || data;
+}

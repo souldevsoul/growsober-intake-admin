@@ -2,13 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Zap, Clock } from 'lucide-react';
+import { LayoutDashboard, Users, UsersRound, Zap, Clock, Workflow } from 'lucide-react';
 
 const nav = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/crm', label: 'CRM Leads', icon: Users },
   { href: '/crm/sequences', label: 'Drip Sequences', icon: Zap },
   { href: '/crm/scheduled', label: 'Scheduled', icon: Clock },
+  { href: '/crm/cohorts', label: 'Cohorts', icon: UsersRound },
+  { href: '/crm/automations', label: 'Automations', icon: Workflow },
 ];
 
 export function Sidebar() {
