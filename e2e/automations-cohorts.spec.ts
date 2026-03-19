@@ -138,9 +138,12 @@ test.describe('City Settings Page', () => {
 
   test('shows seeded city settings', async ({ page }) => {
     await page.goto('/crm/settings');
-    await expect(page.getByText('Lisbon')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('London')).toBeVisible();
-    await expect(page.getByText('Manchester')).toBeVisible();
+    // Use table cell locator to avoid matching sidebar/other text
+    // Wait for data then check city names exist in table rows
+    await expect(page.locator('table tbody tr')).toHaveCount(3, { timeout: 10_000 });
+    await expect(page.locator('table tbody tr').nth(0)).toContainText('Lisbon');
+    await expect(page.locator('table tbody tr').nth(1)).toContainText('London');
+    await expect(page.locator('table tbody tr').nth(2)).toContainText('Manchester');
   });
 
   test('sidebar has Settings link', async ({ page }) => {
