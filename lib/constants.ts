@@ -24,3 +24,21 @@ export const TRIGGER_LABELS: Record<string, string> = {
 export function formatStatus(status: string): string {
   return status.replaceAll('_', ' ');
 }
+
+export function getScoreColor(score: number): string {
+  if (score >= 70) return 'bg-green-500/20 text-green-300 border-green-500/30';
+  if (score >= 40) return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+  return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+}
+
+export const ACTIVITY_ICONS: Record<string, string> = {
+  NOTE: '📝',
+  STATUS_CHANGE: '🔄',
+  TAG_ADDED: '🏷️',
+  TAG_REMOVED: '🏷️',
+  ENROLLED: '📧',
+  UNENROLLED: '❌',
+  PAYMENT: '💳',
+  SMS_SENT: '📤',
+  SMS_RECEIVED: '📥',
+};

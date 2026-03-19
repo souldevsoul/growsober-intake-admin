@@ -228,3 +228,147 @@ export async function cancelEnrollment(enrollmentId: string) {
   const { data } = await crmApi.post(`/enrollments/${enrollmentId}/cancel`);
   return data;
 }
+
+// ============================================================================
+// CRM EXPANSION TYPES
+// ============================================================================
+
+export interface LeadDetail extends CrmLead {
+  score: number;
+  paymentIntentId: string | null;
+  checkoutSessionId: string | null;
+  stripePaymentId: string | null;
+  sobrietyStatus: string | null;
+  interests: string[];
+  smsConversations: Array<{
+    id: string;
+    messages: SmsMessage[];
+  }>;
+}
+
+export interface SmsMessage {
+  id: string;
+  body: string;
+  direction: 'IN' | 'OUT';
+  createdAt: string;
+}
+
+export interface LeadActivity {
+  id: string;
+  leadId: string;
+  type: string;
+  content: string;
+  metadata: Record<string, unknown> | null;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface ScheduledMessage {
+  id: string;
+  leadId: string;
+  lead: { id: string; name: string | null; phone: string };
+  content: string;
+  channel: string;
+  scheduledAt: string;
+  status: 'PENDING' | 'SENT' | 'CANCELLED' | 'FAILED';
+  sentAt: string | null;
+  createdAt: string;
+}
+
+export interface SavedSegment {
+  id: string;
+  name: string;
+  filters: Record<string, string>;
+  count: number;
+  createdAt: string;
+}
+
+// ============================================================================
+// CRM API — Lead Detail
+// ============================================================================
+
+export async function getCrmLead(id: string): Promise<LeadDetail> {
+  const { data } = await crmApi.get(`/leads/${id}`);
+  return data.data || data;
+}
+
+// ============================================================================
+// CRM API — Activity
+// ============================================================================
+
+export async function getLeadActivity(leadId: string, page = 1): Promise<{
+  data: LeadActivity[];
+  meta: { total: number; page: number; limit: number; pages: number };
+}> {
+  const { data } = await crmApi.get(`/leads/${leadId}/activity`, { params: { page } });
+  const inner = data.data || data;
+  if (Array.isArray(inner)) return { data: inner, meta: { total: inner.length, page: 1, limit: 50, pages: 1 } };
+  return { data: inner.data || [], meta: inner.meta || { total: 0, page: 1, limit: 50, pages: 1 } };
+}
+
+export async function addLeadNote(leadId: string, content: string) {
+  const { data } = await crmApi.post(`/leads/${leadId}/notes`, { content });
+  return data;
+}
+
+// ============================================================================
+// CRM API — SMS
+// ============================================================================
+
+export async function getLeadSms(leadId: string): Promise<SmsMessage[]> {
+  const { data } = await crmApi.get(`/leads/${leadId}/sms`);
+  return data.data || data;
+}
+
+export async function sendLeadSms(leadId: string, message: string) {
+  const { data } = await crmApi.post(`/leads/${leadId}/sms`, { message });
+  return data;
+}
+
+export async function scheduleLeadSms(leadId: string, message: string, scheduledAt: string) {
+  const { data } = await crmApi.post(`/leads/${leadId}/sms/schedule`, { message, scheduledAt });
+  return data;
+}
+
+// ============================================================================
+// CRM API — Scheduled Messages
+// ============================================================================
+
+export async function getScheduledMessages(params?: Record<string, string>): Promise<{
+  data: ScheduledMessage[];
+  meta: { total: number; page: number; limit: number; pages: number };
+}> {
+  const { data } = await crmApi.get('/scheduled', { params });
+  const inner = data.data || data;
+  if (Array.isArray(inner)) return { data: inner, meta: { total: inner.length, page: 1, limit: 50, pages: 1 } };
+  return { data: inner.data || [], meta: inner.meta || { total: 0, page: 1, limit: 50, pages: 1 } };
+}
+
+export async function cancelScheduledMessage(id: string) {
+  const { data } = await crmApi.delete(`/scheduled/${id}`);
+  return data;
+}
+
+export async function sendScheduledNow(id: string) {
+  const { data } = await crmApi.post(`/scheduled/${id}/send-now`);
+  return data;
+}
+
+// ============================================================================
+// CRM API — Segments
+// ============================================================================
+
+export async function getSegments(): Promise<SavedSegment[]> {
+  const { data } = await crmApi.get('/segments');
+  return data.data || data;
+}
+
+export async function createSegment(name: string, filters: Record<string, string>) {
+  const { data } = await crmApi.post('/segments', { name, filters });
+  return data;
+}
+
+export async function deleteSegment(id: string) {
+  const { data } = await crmApi.delete(`/segments/${id}`);
+  return data;
+}

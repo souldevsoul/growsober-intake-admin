@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import {
   getCrmLeads,
@@ -10,9 +11,14 @@ import {
   bulkAddTags,
   getSequences,
   enrollLeads,
+  getSegments,
+  createSegment,
+  deleteSegment,
+  updateLead,
 } from '@/lib/api';
-import type { CrmLead, DripSequence } from '@/lib/api';
+import type { CrmLead, DripSequence, SavedSegment } from '@/lib/api';
 import { STATUS_COLORS, ENROLLMENT_COLORS, formatStatus } from '@/lib/constants';
+import { KanbanBoard } from '@/components/crm/KanbanBoard';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,9 +40,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { TagManager } from '@/components/crm/TagManager';
+import { SegmentBar } from '@/components/crm/SegmentBar';
 
 
 export default function CrmLeadsPage() {
+  const router = useRouter();
   const [leads, setLeads] = useState<CrmLead[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -48,6 +56,11 @@ export default function CrmLeadsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sequences, setSequences] = useState<DripSequence[]>([]);
   const [bulkTagInput, setBulkTagInput] = useState('');
+  const [viewMode, setViewMode] = useState<'table' | 'pipeline'>('table');
+
+  // Segment state
+  const [segments, setSegments] = useState<SavedSegment[]>([]);
+  const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -75,6 +88,61 @@ export default function CrmLeadsPage() {
   useEffect(() => {
     getSequences().then(setSequences).catch(console.error);
   }, []);
+
+  // Fetch saved segments on mount
+  const fetchSegments = useCallback(async () => {
+    try {
+      const data = await getSegments();
+      setSegments(data);
+    } catch (err) {
+      console.error('Failed to fetch segments:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSegments();
+  }, [fetchSegments]);
+
+  const handleSegmentSelect = (filters: Record<string, string>) => {
+    // Find the segment that matches these filters so we can highlight it
+    const segment = segments.find(
+      (s) => JSON.stringify(s.filters) === JSON.stringify(filters)
+    );
+    setActiveSegmentId(segment?.id || null);
+
+    // Apply filters to filter state
+    setStatusFilter(filters.status || 'all');
+    setSourceFilter(filters.source || 'all');
+    setSearch(filters.search || '');
+    setPage(1);
+  };
+
+  const handleSegmentSave = async (name: string) => {
+    const filters: Record<string, string> = {};
+    if (statusFilter !== 'all') filters.status = statusFilter;
+    if (sourceFilter !== 'all') filters.source = sourceFilter;
+    if (search) filters.search = search;
+
+    try {
+      await createSegment(name, filters);
+      await fetchSegments();
+    } catch (err) {
+      console.error('Failed to save segment:', err);
+    }
+  };
+
+  const handleSegmentDelete = async (id: string) => {
+    try {
+      await deleteSegment(id);
+      if (activeSegmentId === id) setActiveSegmentId(null);
+      await fetchSegments();
+    } catch (err) {
+      console.error('Failed to delete segment:', err);
+    }
+  };
+
+  // Show save button when any filter is active
+  const hasActiveFilters = statusFilter !== 'all' || sourceFilter !== 'all' || search !== '';
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -119,13 +187,56 @@ export default function CrmLeadsPage() {
     fetchData();
   };
 
+  const handleStatusChange = async (leadId: string, newStatus: string) => {
+    try {
+      await updateLead(leadId, { status: newStatus as CrmLead['status'] });
+      fetchData();
+    } catch (err) {
+      console.error('Failed to update lead status:', err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">CRM Leads</h1>
-          <span className="text-sm text-gray-400">{total} leads</span>
+          <div className="flex items-center gap-3">
+            <div className="flex rounded-lg border border-gray-800 overflow-hidden">
+              <button
+                onClick={() => setViewMode('table')}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                  viewMode === 'table'
+                    ? 'bg-gray-800 text-white'
+                    : 'bg-gray-900 text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                Table
+              </button>
+              <button
+                onClick={() => setViewMode('pipeline')}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                  viewMode === 'pipeline'
+                    ? 'bg-gray-800 text-white'
+                    : 'bg-gray-900 text-gray-400 hover:text-gray-200'
+                }`}
+              >
+                Pipeline
+              </button>
+            </div>
+            <span className="text-sm text-gray-400">{total} leads</span>
+          </div>
         </div>
+
+        {/* Saved Segments */}
+        <SegmentBar
+          segments={segments}
+          activeSegmentId={activeSegmentId}
+          onSelect={handleSegmentSelect}
+          onSave={handleSegmentSave}
+          onDelete={handleSegmentDelete}
+          showSave={hasActiveFilters}
+        />
 
         {/* Filter Bar */}
         <div className="flex flex-wrap gap-3">
@@ -208,127 +319,138 @@ export default function CrmLeadsPage() {
           </div>
         )}
 
-        {/* Leads Table */}
-        <Card className="bg-gray-900 border-gray-800">
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-gray-800 hover:bg-gray-900">
-                  <TableHead className="w-10">
-                    <input
-                      type="checkbox"
-                      checked={leads.length > 0 && selectedIds.size === leads.length}
-                      onChange={toggleAll}
-                      className="accent-blue-500"
-                    />
-                  </TableHead>
-                  <TableHead className="text-gray-400">Name</TableHead>
-                  <TableHead className="text-gray-400">Phone</TableHead>
-                  <TableHead className="text-gray-400">City</TableHead>
-                  <TableHead className="text-gray-400">Status</TableHead>
-                  <TableHead className="text-gray-400">Source</TableHead>
-                  <TableHead className="text-gray-400">Tags</TableHead>
-                  <TableHead className="text-gray-400">Drip</TableHead>
-                  <TableHead className="text-gray-400">When</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={9} className="text-center text-gray-500 py-8">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                ) : leads.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={9} className="text-center text-gray-500 py-8">
-                      No leads found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  leads.map((lead) => (
-                    <TableRow key={lead.id} className="border-gray-800 hover:bg-gray-800/50">
-                      <TableCell>
+        {/* View: Pipeline or Table */}
+        {viewMode === 'pipeline' ? (
+          loading ? (
+            <div className="text-center text-gray-500 py-8">Loading...</div>
+          ) : (
+            <KanbanBoard leads={leads} onStatusChange={handleStatusChange} />
+          )
+        ) : (
+          <>
+            {/* Leads Table */}
+            <Card className="bg-gray-900 border-gray-800">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-gray-800 hover:bg-gray-900">
+                      <TableHead className="w-10">
                         <input
                           type="checkbox"
-                          checked={selectedIds.has(lead.id)}
-                          onChange={() => toggleSelect(lead.id)}
+                          checked={leads.length > 0 && selectedIds.size === leads.length}
+                          onChange={toggleAll}
                           className="accent-blue-500"
                         />
-                      </TableCell>
-                      <TableCell className="font-medium">{lead.name || '-'}</TableCell>
-                      <TableCell className="font-mono text-sm">{lead.phone}</TableCell>
-                      <TableCell>{lead.city || '-'}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={STATUS_COLORS[lead.status] || ''}>
-                          {formatStatus(lead.status)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="bg-gray-800 text-gray-300">
-                          {lead.source}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <TagManager
-                          tags={lead.tags || []}
-                          onAdd={(tag) => handleAddTag(lead.id, tag)}
-                          onRemove={(tag) => handleRemoveTag(lead.id, tag)}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {lead.dripEnrollments?.length > 0 ? (
-                          <div className="space-y-1">
-                            {lead.dripEnrollments.map((e) => (
-                              <Badge
-                                key={e.id}
-                                variant="outline"
-                                className={`text-xs ${ENROLLMENT_COLORS[e.status] || ''}`}
-                              >
-                                {e.sequence.name} (step {e.currentStep})
-                              </Badge>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-gray-600 text-sm">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-gray-400 text-sm">
-                        {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
-                      </TableCell>
+                      </TableHead>
+                      <TableHead className="text-gray-400">Name</TableHead>
+                      <TableHead className="text-gray-400">Phone</TableHead>
+                      <TableHead className="text-gray-400">City</TableHead>
+                      <TableHead className="text-gray-400">Status</TableHead>
+                      <TableHead className="text-gray-400">Source</TableHead>
+                      <TableHead className="text-gray-400">Tags</TableHead>
+                      <TableHead className="text-gray-400">Drip</TableHead>
+                      <TableHead className="text-gray-400">When</TableHead>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center text-gray-500 py-8">
+                          Loading...
+                        </TableCell>
+                      </TableRow>
+                    ) : leads.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center text-gray-500 py-8">
+                          No leads found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      leads.map((lead) => (
+                        <TableRow key={lead.id} onClick={() => router.push(`/crm/leads/${lead.id}`)} className="border-gray-800 hover:bg-gray-800/50 cursor-pointer">
+                          <TableCell>
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(lead.id)}
+                              onChange={(e) => { e.stopPropagation(); toggleSelect(lead.id); }}
+                              className="accent-blue-500"
+                            />
+                          </TableCell>
+                          <TableCell className="font-medium">{lead.name || '-'}</TableCell>
+                          <TableCell className="font-mono text-sm">{lead.phone}</TableCell>
+                          <TableCell>{lead.city || '-'}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={STATUS_COLORS[lead.status] || ''}>
+                              {formatStatus(lead.status)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="bg-gray-800 text-gray-300">
+                              {lead.source}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <TagManager
+                              tags={lead.tags || []}
+                              onAdd={(tag) => handleAddTag(lead.id, tag)}
+                              onRemove={(tag) => handleRemoveTag(lead.id, tag)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {lead.dripEnrollments?.length > 0 ? (
+                              <div className="space-y-1">
+                                {lead.dripEnrollments.map((e) => (
+                                  <Badge
+                                    key={e.id}
+                                    variant="outline"
+                                    className={`text-xs ${ENROLLMENT_COLORS[e.status] || ''}`}
+                                  >
+                                    {e.sequence.name} (step {e.currentStep})
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-gray-600 text-sm">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-gray-400 text-sm">
+                            {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
 
-        {/* Pagination */}
-        {pages > 1 && (
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={page <= 1}
-              onClick={() => setPage(page - 1)}
-              className="border-gray-800 text-gray-300"
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-gray-400">
-              Page {page} of {pages}
-            </span>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={page >= pages}
-              onClick={() => setPage(page + 1)}
-              className="border-gray-800 text-gray-300"
-            >
-              Next
-            </Button>
-          </div>
+            {/* Pagination */}
+            {pages > 1 && (
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page <= 1}
+                  onClick={() => setPage(page - 1)}
+                  className="border-gray-800 text-gray-300"
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-400">
+                  Page {page} of {pages}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page >= pages}
+                  onClick={() => setPage(page + 1)}
+                  className="border-gray-800 text-gray-300"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
