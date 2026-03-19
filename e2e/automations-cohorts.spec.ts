@@ -126,6 +126,30 @@ test.describe('Cohorts Page', () => {
 });
 
 // ===========================================================================
+// City Settings Page
+// ===========================================================================
+
+test.describe('City Settings Page', () => {
+  test('loads with heading and Add button', async ({ page }) => {
+    await page.goto('/crm/settings');
+    await expect(page.getByRole('heading', { name: 'City Settings' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /add/i })).toBeVisible();
+  });
+
+  test('shows seeded city settings', async ({ page }) => {
+    await page.goto('/crm/settings');
+    await expect(page.getByText('Lisbon')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('London')).toBeVisible();
+    await expect(page.getByText('Manchester')).toBeVisible();
+  });
+
+  test('sidebar has Settings link', async ({ page }) => {
+    await page.goto('/crm');
+    await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible();
+  });
+});
+
+// ===========================================================================
 // Navigation — New Pages in Full Cycle
 // ===========================================================================
 
@@ -139,6 +163,9 @@ test.describe('Full Navigation with New Pages', () => {
 
     await page.getByRole('link', { name: 'Automations' }).click();
     await expect(page.getByRole('heading', { name: 'Automations' })).toBeVisible();
+
+    await page.getByRole('link', { name: 'Settings' }).click();
+    await expect(page.getByRole('heading', { name: 'City Settings' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Scheduled' }).click();
     await expect(page.getByRole('heading', { name: 'Scheduled Messages' })).toBeVisible();

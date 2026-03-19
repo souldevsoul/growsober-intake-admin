@@ -535,3 +535,37 @@ export async function markMemberAttendance(memberId: string, attended: boolean) 
   const { data } = await crmApi.patch(`/cohort-members/${memberId}/attendance`, { attended });
   return data.data || data;
 }
+
+// ============================================================================
+// CRM API — City Settings
+// ============================================================================
+
+export interface CitySettings {
+  id: string;
+  city: string;
+  minConfirmed: number;
+  defaultLocation: string | null;
+  defaultNotes: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export async function getCitySettings(): Promise<CitySettings[]> {
+  const { data } = await crmApi.get('/city-settings');
+  return data.data || data;
+}
+
+export async function createCitySettings(dto: { city: string; minConfirmed?: number; defaultLocation?: string; defaultNotes?: string }): Promise<CitySettings> {
+  const { data } = await crmApi.post('/city-settings', dto);
+  return data.data || data;
+}
+
+export async function updateCitySettings(id: string, dto: { minConfirmed?: number; defaultLocation?: string; defaultNotes?: string; isActive?: boolean }): Promise<CitySettings> {
+  const { data } = await crmApi.patch(`/city-settings/${id}`, dto);
+  return data.data || data;
+}
+
+export async function deleteCitySettings(id: string) {
+  const { data } = await crmApi.delete(`/city-settings/${id}`);
+  return data.data || data;
+}

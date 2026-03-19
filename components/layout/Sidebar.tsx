@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, Zap, Clock, UsersRound, Workflow, LayoutDashboard } from 'lucide-react';
+import { Users, Zap, Clock, UsersRound, Workflow, LayoutDashboard, Settings } from 'lucide-react';
 
 // Mountain Logo SVG from growsober-web
 function MountainLogo({ className = 'w-8 h-6' }: { className?: string }) {
@@ -21,6 +21,7 @@ const nav = [
   { href: '/crm/scheduled', label: 'Scheduled', icon: Clock },
   { href: '/crm/cohorts', label: 'Cohorts', icon: UsersRound },
   { href: '/crm/automations', label: 'Automations', icon: Workflow },
+  { href: '/crm/settings', label: 'Settings', icon: Settings },
 ];
 
 export function Sidebar() {
