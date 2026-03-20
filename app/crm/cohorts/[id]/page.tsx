@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { ChevronLeft } from 'lucide-react';
 import {
   getCohort,
@@ -18,8 +18,13 @@ import {
   updateMemberRsvp,
   markMemberAttendance,
   getCrmLeads,
+  getCohortChat,
+  sendCohortChatMessage,
+  getNpsResults,
+  sendNpsSurveys,
+  recreateCohort,
 } from '@/lib/api';
-import type { Cohort, CohortMember, CrmLead } from '@/lib/api';
+import type { Cohort, CohortMember, CrmLead, ChatMessage, NpsResults } from '@/lib/api';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -70,6 +75,21 @@ export default function CohortDetailPage() {
   const [searchResults, setSearchResults] = useState<CrmLead[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
+  // Chat
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatSending, setChatSending] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // NPS
+  const [npsResults, setNpsResults] = useState<NpsResults | null>(null);
+  const [npsLoading, setNpsLoading] = useState(false);
+  const [npsSending, setNpsSending] = useState(false);
+
+  // Recreate
+  const [recreateLoading, setRecreateLoading] = useState(false);
+
   const fetchCohort = useCallback(async () => {
     try {
       const data = await getCohort(id);
@@ -81,9 +101,41 @@ export default function CohortDetailPage() {
     }
   }, [id]);
 
+  const fetchChat = useCallback(async () => {
+    setChatLoading(true);
+    try {
+      const result = await getCohortChat(id);
+      setChatMessages(result.data || []);
+    } catch (err) {
+      console.error('Failed to fetch chat:', err);
+    } finally {
+      setChatLoading(false);
+    }
+  }, [id]);
+
+  const fetchNps = useCallback(async () => {
+    setNpsLoading(true);
+    try {
+      const result = await getNpsResults(id);
+      setNpsResults(result);
+    } catch (err) {
+      console.error('Failed to fetch NPS:', err);
+    } finally {
+      setNpsLoading(false);
+    }
+  }, [id]);
+
   useEffect(() => {
-    if (id) fetchCohort();
-  }, [id, fetchCohort]);
+    if (id) {
+      fetchCohort();
+      fetchChat();
+      fetchNps();
+    }
+  }, [id, fetchCohort, fetchChat, fetchNps]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
 
   // Debounced lead search
   useEffect(() => {
@@ -162,6 +214,44 @@ export default function CohortDetailPage() {
 
   const handleAttendance = (memberId: string, attended: boolean) =>
     withAction(() => markMemberAttendance(memberId, attended));
+
+  const handleSendChat = async () => {
+    if (!chatInput.trim()) return;
+    setChatSending(true);
+    try {
+      await sendCohortChatMessage(id, chatInput.trim());
+      setChatInput('');
+      fetchChat();
+    } catch (err) {
+      console.error('Failed to send chat message:', err);
+    } finally {
+      setChatSending(false);
+    }
+  };
+
+  const handleSendNps = async () => {
+    setNpsSending(true);
+    try {
+      await sendNpsSurveys(id);
+      fetchNps();
+    } catch (err) {
+      console.error('Failed to send NPS surveys:', err);
+    } finally {
+      setNpsSending(false);
+    }
+  };
+
+  const handleRecreateCohort = async () => {
+    setRecreateLoading(true);
+    try {
+      const newCohort = await recreateCohort(id);
+      router.push(`/crm/cohorts/${newCohort.id}`);
+    } catch (err) {
+      console.error('Failed to recreate cohort:', err);
+    } finally {
+      setRecreateLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -298,6 +388,15 @@ export default function CohortDetailPage() {
               </Button>
             </>
           )}
+          {isCompleted && (
+            <Button
+              onClick={handleRecreateCohort}
+              disabled={recreateLoading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {recreateLoading ? 'Recreating...' : 'Recreate Cohort'}
+            </Button>
+          )}
           {!isCompleted && !isCancelled && (
             <Button
               variant="outline"
@@ -401,6 +500,49 @@ export default function CohortDetailPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* NPS Section */}
+        <Card className="neon-card">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">NPS Survey</CardTitle>
+              <Button
+                onClick={handleSendNps}
+                disabled={npsSending}
+                size="sm"
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                {npsSending ? 'Sending...' : 'Send NPS Survey'}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {npsLoading ? (
+              <p className="text-sm text-white/30">Loading NPS data...</p>
+            ) : npsResults && npsResults.totalResponses > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white/[0.04] border border-white/[0.08] rounded-lg p-4 text-center">
+                  <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Responses</p>
+                  <p className="text-2xl font-bold mono-num">{npsResults.totalResponses}</p>
+                </div>
+                <div className="bg-white/[0.04] border border-white/[0.08] rounded-lg p-4 text-center">
+                  <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Average Score</p>
+                  <p className="text-2xl font-bold mono-num">{npsResults.averageScore.toFixed(1)}</p>
+                </div>
+                <div className="bg-white/[0.04] border border-white/[0.08] rounded-lg p-4 text-center">
+                  <p className="text-xs text-white/30 uppercase tracking-wider mb-1">NPS</p>
+                  <p className={`text-2xl font-bold mono-num ${
+                    npsResults.nps >= 50 ? 'text-green-400' : npsResults.nps >= 0 ? 'text-yellow-400' : 'text-red-400'
+                  }`}>
+                    {npsResults.nps > 0 ? '+' : ''}{npsResults.nps}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-white/30 text-center py-4">No NPS responses yet. Send a survey to collect feedback.</p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Members */}
         <Card className="neon-card">
@@ -587,6 +729,71 @@ export default function CohortDetailPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Cohort Chat */}
+        <Card className="neon-card">
+          <CardHeader>
+            <CardTitle className="text-lg">Cohort Chat</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Messages */}
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {chatLoading ? (
+                <p className="text-sm text-white/30 text-center py-4">Loading chat...</p>
+              ) : chatMessages.length === 0 ? (
+                <p className="text-sm text-white/30 text-center py-4">No messages yet</p>
+              ) : (
+                chatMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`${msg.isSystem ? 'flex justify-center' : 'flex justify-start'}`}
+                  >
+                    {msg.isSystem ? (
+                      <div className="bg-white/[0.04] border border-white/[0.08] rounded-full px-4 py-1">
+                        <p className="text-xs text-white/40 italic">{msg.content}</p>
+                      </div>
+                    ) : (
+                      <div className="max-w-[80%] rounded-lg p-3 bg-white/[0.04] border border-white/[0.12]">
+                        <p className="text-xs text-blue-400 font-medium mb-1">
+                          {msg.lead?.name || 'Admin'}
+                        </p>
+                        <p className="text-sm text-white/60">{msg.content}</p>
+                        <p className="text-xs text-white/30 mt-1">
+                          {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Compose */}
+            <div className="flex gap-2">
+              <textarea
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendChat();
+                  }
+                }}
+                placeholder="Type a message to the cohort..."
+                className="flex-1 bg-white/[0.04] border border-white/[0.12] rounded-md p-2 text-sm text-white placeholder:text-white/30 resize-none"
+                rows={2}
+              />
+              <Button
+                onClick={handleSendChat}
+                disabled={chatSending || !chatInput.trim()}
+                className="shrink-0 self-end"
+              >
+                {chatSending ? '...' : 'Send'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

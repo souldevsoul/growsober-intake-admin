@@ -569,3 +569,152 @@ export async function deleteCitySettings(id: string) {
   const { data } = await crmApi.delete(`/city-settings/${id}`);
   return data.data || data;
 }
+
+// ============================================================================
+// CRM API — Analytics
+// ============================================================================
+
+export interface FunnelStage { status: string; count: number; }
+export interface FunnelData {
+  stages: FunnelStage[];
+  total: number;
+  conversionRates: { infoToLink: number; linkToPaid: number; paidToMatched: number; overallConversion: number };
+}
+
+export interface SourceData { source: string; total: number; matched: number; conversionRate: number; }
+export interface CohortFunnelStage { stage: string; count: number; }
+
+export async function getFunnelData(): Promise<FunnelData> {
+  const { data } = await crmApi.get('/analytics/funnel');
+  return data.data || data;
+}
+
+export async function getSourceAttribution(): Promise<SourceData[]> {
+  const { data } = await crmApi.get('/analytics/source');
+  return data.data || data;
+}
+
+export async function getCohortFunnel(): Promise<{ stages: CohortFunnelStage[] }> {
+  const { data } = await crmApi.get('/analytics/cohort-funnel');
+  return data.data || data;
+}
+
+// ============================================================================
+// CRM API — Timeline
+// ============================================================================
+
+export interface TimelineEntry {
+  type: string;
+  content: string;
+  timestamp: string;
+  metadata?: Record<string, unknown>;
+}
+
+export async function getLeadTimeline(leadId: string, page = 1, type?: string): Promise<{ data: TimelineEntry[]; meta: any }> {
+  const params: Record<string, string> = { page: String(page) };
+  if (type && type !== 'all') params.type = type;
+  const { data } = await crmApi.get(`/leads/${leadId}/timeline`, { params });
+  const inner = data.data || data;
+  if (Array.isArray(inner)) return { data: inner, meta: { total: inner.length, page: 1, limit: 50, pages: 1 } };
+  return { data: inner.data || [], meta: inner.meta || { total: 0, page: 1, limit: 50, pages: 1 } };
+}
+
+// ============================================================================
+// CRM API — Waitlist
+// ============================================================================
+
+export async function getWaitlist(city?: string) {
+  const params = city ? { city } : {};
+  const { data } = await crmApi.get('/waitlist', { params });
+  return data.data || data;
+}
+
+export async function assignWaitlistToCohort(leadId: string, cohortId: string) {
+  const { data } = await crmApi.post(`/waitlist/${leadId}/assign/${cohortId}`);
+  return data.data || data;
+}
+
+// ============================================================================
+// CRM API — Automation Analytics
+// ============================================================================
+
+export interface AutomationAnalytics { id: string; name: string; trigger: string; total: number; sent: number; failed: number; deliveryRate: number; }
+
+export async function getAutomationAnalytics(): Promise<AutomationAnalytics[]> {
+  const { data } = await crmApi.get('/automations/analytics');
+  return data.data || data;
+}
+
+// ============================================================================
+// CRM API — Engagement Score
+// ============================================================================
+
+export async function getEngagementScore(leadId: string): Promise<{ leadId: string; engagementScore: number }> {
+  const { data } = await crmApi.get(`/leads/${leadId}/engagement`);
+  return data.data || data;
+}
+
+export async function recalculateScores() {
+  const { data } = await crmApi.post('/scores/recalculate');
+  return data.data || data;
+}
+
+// ============================================================================
+// CRM API — Availability
+// ============================================================================
+
+export async function updateLeadAvailability(leadId: string, preferredDays: string[]) {
+  const { data } = await crmApi.patch(`/leads/${leadId}/availability`, { preferredDays });
+  return data.data || data;
+}
+
+// ============================================================================
+// CRM API — Cohort Chat
+// ============================================================================
+
+export interface ChatMessage { id: string; chatId: string; leadId: string | null; lead: { id: string; name: string } | null; isSystem: boolean; content: string; createdAt: string; }
+
+export async function getCohortChat(cohortId: string, page = 1): Promise<{ data: ChatMessage[]; meta: any }> {
+  const { data } = await crmApi.get(`/cohorts/${cohortId}/chat`, { params: { page: String(page) } });
+  const inner = data.data || data;
+  if (Array.isArray(inner)) return { data: inner, meta: { total: inner.length, page: 1, limit: 50, pages: 1 } };
+  return { data: inner.data || [], meta: inner.meta || { total: 0, page: 1, limit: 50, pages: 1 } };
+}
+
+export async function sendCohortChatMessage(cohortId: string, content: string, leadId?: string) {
+  const { data } = await crmApi.post(`/cohorts/${cohortId}/chat`, { content, leadId });
+  return data.data || data;
+}
+
+// ============================================================================
+// CRM API — NPS
+// ============================================================================
+
+export interface NpsResults { totalResponses: number; averageScore: number; nps: number; distribution: Array<{ score: number; count: number }>; }
+
+export async function getNpsResults(cohortId?: string, city?: string): Promise<NpsResults> {
+  const params: Record<string, string> = {};
+  if (cohortId) params.cohortId = cohortId;
+  if (city) params.city = city;
+  const { data } = await crmApi.get('/nps', { params });
+  return data.data || data;
+}
+
+export async function sendNpsSurveys(cohortId: string) {
+  const { data } = await crmApi.post(`/cohorts/${cohortId}/send-nps`);
+  return data.data || data;
+}
+
+export async function respondNps(surveyId: string, score: number, feedback?: string) {
+  const { data } = await crmApi.post(`/nps/${surveyId}/respond`, { score, feedback });
+  return data.data || data;
+}
+
+// ============================================================================
+// CRM API — Recurring Cohorts
+// ============================================================================
+
+export async function recreateCohort(cohortId: string): Promise<Cohort> {
+  const { data } = await crmApi.post(`/cohorts/${cohortId}/recreate`);
+  return data.data || data;
+}

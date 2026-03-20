@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getAutomations, createAutomation, updateAutomation, deleteAutomation } from '@/lib/api';
-import type { CrmAutomation } from '@/lib/api';
+import { getAutomations, createAutomation, updateAutomation, deleteAutomation, getAutomationAnalytics } from '@/lib/api';
+import type { CrmAutomation, AutomationAnalytics } from '@/lib/api';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -60,8 +60,21 @@ function HighlightedTemplate({ text }: { text: string }) {
   );
 }
 
+function getDeliveryRateColor(rate: number): string {
+  if (rate >= 90) return 'text-green-400';
+  if (rate >= 70) return 'text-yellow-400';
+  return 'text-red-400';
+}
+
+function getDeliveryRateBorder(rate: number): string {
+  if (rate >= 90) return 'border-green-500/30';
+  if (rate >= 70) return 'border-yellow-500/30';
+  return 'border-red-500/30';
+}
+
 export default function AutomationsPage() {
   const [automations, setAutomations] = useState<CrmAutomation[]>([]);
+  const [analytics, setAnalytics] = useState<AutomationAnalytics[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -89,8 +102,18 @@ export default function AutomationsPage() {
     }
   };
 
+  const fetchAnalytics = async () => {
+    try {
+      const data = await getAutomationAnalytics();
+      setAnalytics(data);
+    } catch (err) {
+      console.error('Failed to fetch automation analytics:', err);
+    }
+  };
+
   useEffect(() => {
     fetchAutomations();
+    fetchAnalytics();
   }, []);
 
   const handleCreate = async () => {
@@ -165,6 +188,33 @@ export default function AutomationsPage() {
             {showCreate ? 'Cancel' : 'Add Automation'}
           </Button>
         </div>
+
+        {/* Analytics Summary */}
+        {analytics.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {analytics.map((a) => (
+              <Card key={a.id} className={`neon-card border ${getDeliveryRateBorder(a.deliveryRate)}`}>
+                <CardContent className="p-4 space-y-2">
+                  <p className="text-sm font-semibold text-white truncate">{a.name}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-white/30 uppercase tracking-wider">Total Sent</span>
+                    <span className="text-sm font-medium mono-num">{a.total}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-white/30 uppercase tracking-wider">Delivery Rate</span>
+                    <span className={`text-sm font-bold mono-num ${getDeliveryRateColor(a.deliveryRate)}`}>
+                      {a.deliveryRate.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-white/40">
+                    <span className="text-green-400 mono-num">{a.sent} sent</span>
+                    <span className="text-red-400 mono-num">{a.failed} failed</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* Create Form */}
         {showCreate && (

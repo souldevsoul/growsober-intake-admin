@@ -17,8 +17,11 @@ import {
   pauseEnrollment,
   resumeEnrollment,
   cancelEnrollment,
+  getEngagementScore,
+  getLeadTimeline,
+  updateLeadAvailability,
 } from '@/lib/api';
-import type { LeadDetail, LeadActivity as LeadActivityType, SmsMessage } from '@/lib/api';
+import type { LeadDetail, LeadActivity as LeadActivityType, SmsMessage, TimelineEntry } from '@/lib/api';
 import {
   STATUS_COLORS,
   ENROLLMENT_COLORS,
@@ -50,6 +53,35 @@ import { TagManager } from '@/components/crm/TagManager';
 
 const STATUSES = ['CALLED', 'INFO_COLLECTED', 'LINK_SENT', 'PAID', 'MATCHED', 'FAILED'];
 
+const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+const TIMELINE_ICONS: Record<string, string> = {
+  note: '📝',
+  sms: '📱',
+  drip: '📧',
+  automation: '⚡',
+  cohort: '👥',
+  status_change: '🔄',
+  tag: '🏷️',
+  payment: '💳',
+};
+
+const TIMELINE_TYPE_COLORS: Record<string, string> = {
+  note: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  sms: 'bg-green-500/20 text-green-300 border-green-500/30',
+  drip: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  automation: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+  cohort: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+};
+
+const TIMELINE_FILTERS = ['all', 'note', 'sms', 'drip', 'automation', 'cohort'] as const;
+
+function getEngagementColor(score: number): string {
+  if (score >= 70) return 'bg-green-500/20 text-green-300 border-green-500/30';
+  if (score >= 40) return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+  return 'bg-red-500/20 text-red-300 border-red-500/30';
+}
+
 export default function LeadDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -65,12 +97,28 @@ export default function LeadDetailPage() {
   const [smsInput, setSmsInput] = useState('');
   const [smsLoading, setSmsLoading] = useState(false);
 
+  // Engagement score
+  const [engagementScore, setEngagementScore] = useState<number | null>(null);
+
+  // Unified timeline
+  const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
+  const [timelineFilter, setTimelineFilter] = useState<string>('all');
+  const [timelineLoading, setTimelineLoading] = useState(false);
+
+  // Availability
+  const [preferredDays, setPreferredDays] = useState<string[]>([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+
   const smsEndRef = useRef<HTMLDivElement>(null);
 
   const fetchLead = async () => {
     try {
       const data = await getCrmLead(id);
       setLead(data);
+      // Initialize preferred days from lead data if available
+      if ((data as any).preferredDays) {
+        setPreferredDays((data as any).preferredDays);
+      }
     } catch (err) {
       console.error('Failed to fetch lead:', err);
     }
@@ -94,13 +142,39 @@ export default function LeadDetailPage() {
     }
   };
 
+  const fetchEngagementScore = async () => {
+    try {
+      const result = await getEngagementScore(id);
+      setEngagementScore(result.engagementScore);
+    } catch (err) {
+      console.error('Failed to fetch engagement score:', err);
+    }
+  };
+
+  const fetchTimeline = async (filter?: string) => {
+    setTimelineLoading(true);
+    try {
+      const result = await getLeadTimeline(id, 1, filter || timelineFilter);
+      setTimeline(result.data || []);
+    } catch (err) {
+      console.error('Failed to fetch timeline:', err);
+    } finally {
+      setTimelineLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    Promise.all([fetchLead(), fetchActivities(), fetchSms()]).finally(() =>
+    Promise.all([fetchLead(), fetchActivities(), fetchSms(), fetchEngagementScore(), fetchTimeline()]).finally(() =>
       setLoading(false),
     );
   }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    fetchTimeline(timelineFilter);
+  }, [timelineFilter]);
 
   useEffect(() => {
     smsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -111,6 +185,7 @@ export default function LeadDetailPage() {
     await updateLead(lead.id, { status: newStatus as LeadDetail['status'] });
     fetchLead();
     fetchActivities();
+    fetchTimeline();
   };
 
   const handleAddTag = async (tag: string) => {
@@ -118,6 +193,7 @@ export default function LeadDetailPage() {
     await addTagsToLead(lead.id, [tag]);
     fetchLead();
     fetchActivities();
+    fetchTimeline();
   };
 
   const handleRemoveTag = async (tag: string) => {
@@ -125,6 +201,7 @@ export default function LeadDetailPage() {
     await removeTagsFromLead(lead.id, [tag]);
     fetchLead();
     fetchActivities();
+    fetchTimeline();
   };
 
   const handleAddNote = async () => {
@@ -134,6 +211,7 @@ export default function LeadDetailPage() {
       await addLeadNote(lead.id, noteInput.trim());
       setNoteInput('');
       fetchActivities();
+      fetchTimeline();
     } catch (err) {
       console.error('Failed to add note:', err);
     } finally {
@@ -149,6 +227,7 @@ export default function LeadDetailPage() {
       setSmsInput('');
       fetchSms();
       fetchActivities();
+      fetchTimeline();
     } catch (err) {
       console.error('Failed to send SMS:', err);
     } finally {
@@ -176,6 +255,25 @@ export default function LeadDetailPage() {
     else await cancelEnrollment(enrollmentId);
     fetchLead();
     fetchActivities();
+    fetchTimeline();
+  };
+
+  const handleDayToggle = async (day: string) => {
+    if (!lead) return;
+    setAvailabilityLoading(true);
+    const newDays = preferredDays.includes(day)
+      ? preferredDays.filter((d) => d !== day)
+      : [...preferredDays, day];
+    setPreferredDays(newDays);
+    try {
+      await updateLeadAvailability(lead.id, newDays);
+    } catch (err) {
+      console.error('Failed to update availability:', err);
+      // Revert on error
+      setPreferredDays(preferredDays);
+    } finally {
+      setAvailabilityLoading(false);
+    }
   };
 
   if (loading) {
@@ -237,10 +335,18 @@ export default function LeadDetailPage() {
           >
             Score: <span className="mono-num">{lead.score ?? 0}</span>
           </Badge>
+          {engagementScore !== null && (
+            <Badge
+              variant="outline"
+              className={getEngagementColor(engagementScore)}
+            >
+              Engagement: <span className="mono-num">{engagementScore}</span>
+            </Badge>
+          )}
         </div>
 
         {/* Quick Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Card className="neon-card">
             <CardContent className="p-4">
               <p className="text-xs text-white/30 uppercase tracking-wider mb-1">City</p>
@@ -281,6 +387,32 @@ export default function LeadDetailPage() {
                 onAdd={handleAddTag}
                 onRemove={handleRemoveTag}
               />
+            </CardContent>
+          </Card>
+          <Card className="neon-card">
+            <CardContent className="p-4">
+              <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Preferred Days</p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {DAYS_OF_WEEK.map((day) => (
+                  <label
+                    key={day}
+                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs cursor-pointer transition-colors ${
+                      preferredDays.includes(day)
+                        ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                        : 'bg-white/[0.04] text-white/40 border border-white/[0.08]'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={preferredDays.includes(day)}
+                      onChange={() => handleDayToggle(day)}
+                      disabled={availabilityLoading}
+                      className="sr-only"
+                    />
+                    {day.slice(0, 3)}
+                  </label>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -344,6 +476,84 @@ export default function LeadDetailPage() {
           </CardContent>
         </Card>
 
+        {/* Unified Timeline */}
+        <Card className="neon-card">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Timeline</CardTitle>
+              <Select value={timelineFilter} onValueChange={setTimelineFilter}>
+                <SelectTrigger className="bg-black border-white/[0.15] text-white w-[160px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-black border-white/[0.15]">
+                  {TIMELINE_FILTERS.map((f) => (
+                    <SelectItem key={f} value={f}>
+                      {f === 'all' ? 'All Types' : f.charAt(0).toUpperCase() + f.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Note Input */}
+            <div className="flex gap-2">
+              <Input
+                value={noteInput}
+                onChange={(e) => setNoteInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAddNote();
+                }}
+                placeholder="Add a note..."
+                className="bg-white/[0.04] border-white/[0.12] text-white placeholder:text-white/30"
+              />
+              <Button
+                onClick={handleAddNote}
+                disabled={noteLoading || !noteInput.trim()}
+                className="shrink-0"
+              >
+                {noteLoading ? '...' : 'Add'}
+              </Button>
+            </div>
+
+            {/* Timeline Entries */}
+            <div className="space-y-3 max-h-[500px] overflow-y-auto">
+              {timelineLoading ? (
+                <p className="text-sm text-white/30 text-center py-4">Loading timeline...</p>
+              ) : timeline.length === 0 ? (
+                <p className="text-sm text-white/30 text-center py-4">No activity yet</p>
+              ) : (
+                timeline.map((entry, idx) => (
+                  <div
+                    key={`${entry.type}-${entry.timestamp}-${idx}`}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.04] border border-white/[0.08]"
+                  >
+                    <span className="text-lg shrink-0">
+                      {TIMELINE_ICONS[entry.type] || ACTIVITY_ICONS[entry.type] || '📋'}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white/60">{entry.content}</p>
+                      <p className="text-xs text-white/30 mt-1">
+                        {formatDistanceToNow(new Date(entry.timestamp), {
+                          addSuffix: true,
+                        })}
+                      </p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`text-xs shrink-0 uppercase tracking-wider font-semibold ${
+                        TIMELINE_TYPE_COLORS[entry.type] || 'bg-white/[0.04] text-white/40 border-white/[0.12]'
+                      }`}
+                    >
+                      {entry.type.replaceAll('_', ' ')}
+                    </Badge>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Two-Column Layout: Activity + SMS */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left: Activity Timeline + Notes */}
@@ -352,26 +562,6 @@ export default function LeadDetailPage() {
               <CardTitle className="text-lg">Activity</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Note Input */}
-              <div className="flex gap-2">
-                <Input
-                  value={noteInput}
-                  onChange={(e) => setNoteInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleAddNote();
-                  }}
-                  placeholder="Add a note..."
-                  className="bg-white/[0.04] border-white/[0.12] text-white placeholder:text-white/30"
-                />
-                <Button
-                  onClick={handleAddNote}
-                  disabled={noteLoading || !noteInput.trim()}
-                  className="shrink-0"
-                >
-                  {noteLoading ? '...' : 'Add'}
-                </Button>
-              </div>
-
               {/* Timeline */}
               <div className="space-y-3 max-h-[400px] overflow-y-auto">
                 {activities.length === 0 ? (
