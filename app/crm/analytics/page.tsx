@@ -54,7 +54,7 @@ function formatLabel(s: string) {
 }
 
 function pct(n: number) {
-  return `${(n * 100).toFixed(1)}%`;
+  return `${n.toFixed(1)}%`;
 }
 
 // ── main page ───────────────────────────────────────────────────────────────
@@ -190,7 +190,7 @@ export default function AnalyticsPage() {
                         <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between">
                           <span className="text-white/40 text-xs">Conversion</span>
                           <span className="mono-num text-white font-bold">
-                            {(src.conversionRate * 100).toFixed(1)}%
+                            {src.conversionRate.toFixed(1)}%
                           </span>
                         </div>
                       </CardContent>
