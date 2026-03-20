@@ -14,9 +14,10 @@ test.describe('Automations Page', () => {
   test('shows seeded automation rules', async ({ page }) => {
     await page.goto('/crm/automations');
     // Wait for data to load
-    await expect(page.getByText('Cohort Invitation')).toBeVisible({ timeout: 10_000 });
+    // Wait for automations to load
+    await expect(page.getByRole('heading', { name: 'Cohort Invitation' })).toBeVisible({ timeout: 10_000 });
 
-    // All 5 seeded automations should be in the page (may need scrolling)
+    // All 5 seeded automations should be in the page as headings
     const names = ['Cohort Invitation', 'RSVP Confirmed', 'RSVP Declined', '24h Event Reminder', 'Post-Event Thank You'];
     for (const name of names) {
       await expect(page.getByRole('heading', { name })).toBeAttached();
@@ -25,7 +26,7 @@ test.describe('Automations Page', () => {
 
   test('automation cards show trigger badges', async ({ page }) => {
     await page.goto('/crm/automations');
-    await expect(page.getByText('Cohort Invitation')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Cohort Invitation' })).toBeVisible({ timeout: 10_000 });
 
     // Trigger badges exist in DOM (use exact match to avoid conflicts with heading names)
     const badges = ['COHORT INVITED', 'RSVP CONFIRMED', 'RSVP DECLINED', 'HOURS BEFORE EVENT', 'EVENT COMPLETED'];
@@ -36,7 +37,7 @@ test.describe('Automations Page', () => {
 
   test('automation cards show SMS channel badge', async ({ page }) => {
     await page.goto('/crm/automations');
-    await expect(page.getByText('Cohort Invitation')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Cohort Invitation' })).toBeVisible({ timeout: 10_000 });
 
     const smsBadges = page.getByText('SMS');
     expect(await smsBadges.count()).toBeGreaterThanOrEqual(5);
@@ -44,7 +45,7 @@ test.describe('Automations Page', () => {
 
   test('automation cards show message templates with placeholders', async ({ page }) => {
     await page.goto('/crm/automations');
-    await expect(page.getByText('Cohort Invitation')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Cohort Invitation' })).toBeVisible({ timeout: 10_000 });
 
     // Templates should contain placeholder syntax
     await expect(page.getByText(/\{\{name\}\}/).first()).toBeVisible();
@@ -53,7 +54,7 @@ test.describe('Automations Page', () => {
 
   test('each automation has Active, Edit, Delete buttons', async ({ page }) => {
     await page.goto('/crm/automations');
-    await expect(page.getByText('Cohort Invitation')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Cohort Invitation' })).toBeVisible({ timeout: 10_000 });
 
     const activeButtons = page.getByRole('button', { name: 'Active' });
     const editButtons = page.getByRole('button', { name: 'Edit' });
@@ -66,7 +67,7 @@ test.describe('Automations Page', () => {
 
   test('Add Automation button shows create form', async ({ page }) => {
     await page.goto('/crm/automations');
-    await expect(page.getByText('Cohort Invitation')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Cohort Invitation' })).toBeVisible({ timeout: 10_000 });
 
     await page.getByRole('button', { name: 'Add Automation' }).click();
 

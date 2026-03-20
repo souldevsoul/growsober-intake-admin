@@ -307,8 +307,8 @@ test.describe('Lead Detail Page', () => {
     await expect(addBtn).toBeEnabled();
     await addBtn.click();
 
-    // Note should appear in the activity feed
-    await expect(page.getByText(noteText)).toBeVisible({ timeout: 10_000 });
+    // Note should appear in the activity feed or timeline
+    await expect(page.getByText(noteText).first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('shows SMS conversation section', async ({ page }) => {
