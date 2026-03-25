@@ -20,6 +20,7 @@ import {
   getEngagementScore,
   getLeadTimeline,
   updateLeadAvailability,
+  deleteLead,
 } from '@/lib/api';
 import type { LeadDetail, LeadActivity as LeadActivityType, SmsMessage, TimelineEntry } from '@/lib/api';
 import {
@@ -258,6 +259,16 @@ export default function LeadDetailPage() {
     fetchTimeline();
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this lead? This cannot be undone.')) return;
+    try {
+      await deleteLead(id);
+      router.push('/crm');
+    } catch (err) {
+      console.error('Failed to delete lead:', err);
+    }
+  };
+
   const handleDayToggle = async (day: string) => {
     if (!lead) return;
     setAvailabilityLoading(true);
@@ -343,6 +354,13 @@ export default function LeadDetailPage() {
               Engagement: <span className="mono-num">{engagementScore}</span>
             </Badge>
           )}
+          <Button
+            variant="outline"
+            onClick={handleDelete}
+            className="border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300"
+          >
+            Delete
+          </Button>
         </div>
 
         {/* Quick Info Cards */}

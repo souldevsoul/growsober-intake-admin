@@ -368,11 +368,11 @@ export default function CrmLeadsPage() {
                     ) : (
                       leads.map((lead) => (
                         <TableRow key={lead.id} onClick={() => router.push(`/crm/leads/${lead.id}`)} className="border-white/[0.08] hover:bg-white/[0.04] cursor-pointer">
-                          <TableCell>
+                          <TableCell onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox"
                               checked={selectedIds.has(lead.id)}
-                              onChange={(e) => { e.stopPropagation(); toggleSelect(lead.id); }}
+                              onChange={() => toggleSelect(lead.id)}
                               className="accent-blue-500"
                             />
                           </TableCell>

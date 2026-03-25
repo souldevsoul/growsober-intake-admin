@@ -292,6 +292,11 @@ export async function getCrmLead(id: string): Promise<LeadDetail> {
   return data.data || data;
 }
 
+export async function deleteLead(id: string) {
+  const { data } = await crmApi.delete(`/leads/${id}`);
+  return data.data || data;
+}
+
 // ============================================================================
 // CRM API — Activity
 // ============================================================================
