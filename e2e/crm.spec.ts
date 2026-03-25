@@ -261,7 +261,7 @@ test.describe('Lead Detail Page', () => {
     await expect(page.getByText('City')).toBeVisible();
     await expect(page.getByText('Sobriety Status')).toBeVisible();
     await expect(page.getByText('Interests')).toBeVisible();
-    await expect(page.getByText('Tags')).toBeVisible();
+    await expect(page.getByText('Tags', { exact: true }).first()).toBeVisible();
   });
 
   test('shows payment section', async ({ page }) => {
