@@ -587,7 +587,7 @@ export interface FunnelData {
 }
 
 export interface SourceData { source: string; total: number; matched: number; conversionRate: number; }
-export interface CohortFunnelStage { stage: string; count: number; }
+export interface CrewFunnelStage { stage: string; count: number; }
 
 export async function getFunnelData(): Promise<FunnelData> {
   const { data } = await crmApi.get('/analytics/funnel');
@@ -599,8 +599,8 @@ export async function getSourceAttribution(): Promise<SourceData[]> {
   return data.data || data;
 }
 
-export async function getCohortFunnel(): Promise<{ stages: CohortFunnelStage[] }> {
-  const { data } = await crmApi.get('/analytics/cohort-funnel');
+export async function getCrewFunnel(): Promise<{ stages: CrewFunnelStage[] }> {
+  const { data } = await crmApi.get('/analytics/crew-funnel');
   return data.data || data;
 }
 

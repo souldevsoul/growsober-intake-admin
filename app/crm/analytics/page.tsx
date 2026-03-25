@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getFunnelData, getSourceAttribution, getCohortFunnel } from '@/lib/api';
-import type { FunnelData, SourceData, CohortFunnelStage } from '@/lib/api';
+import { getFunnelData, getSourceAttribution, getCrewFunnel } from '@/lib/api';
+import type { FunnelData, SourceData, CrewFunnelStage } from '@/lib/api';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -61,7 +61,7 @@ function pct(n: number) {
 export default function AnalyticsPage() {
   const [funnel, setFunnel] = useState<FunnelData | null>(null);
   const [sources, setSources] = useState<SourceData[]>([]);
-  const [cohortStages, setCohortStages] = useState<CohortFunnelStage[]>([]);
+  const [crewStages, setCohortStages] = useState<CrewFunnelStage[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAll = async () => {
@@ -70,7 +70,7 @@ export default function AnalyticsPage() {
       const [f, s, c] = await Promise.all([
         getFunnelData(),
         getSourceAttribution(),
-        getCohortFunnel(),
+        getCrewFunnel(),
       ]);
       setFunnel(f);
       setSources(s);
@@ -89,7 +89,7 @@ export default function AnalyticsPage() {
   const maxFunnelCount = funnel
     ? Math.max(...funnel.stages.map((s) => s.count), 1)
     : 1;
-  const maxCohortCount = Math.max(...cohortStages.map((s) => s.count), 1);
+  const maxCrewCount = Math.max(...crewStages.map((s) => s.count), 1);
 
   return (
     <div className="min-h-screen bg-black neon-grid-bg text-white p-6">
@@ -203,14 +203,14 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            {/* ── Section 3: Cohort Funnel ────────────────────────────────── */}
+            {/* ── Section 3: Crew Funnel ────────────────────────────────── */}
             <Card className="neon-card">
               <CardHeader>
-                <CardTitle className="text-lg">Cohort Funnel</CardTitle>
+                <CardTitle className="text-lg">Crew Funnel</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {cohortStages.map((stage) => {
-                  const widthPct = Math.max((stage.count / maxCohortCount) * 100, 4);
+                {crewStages.map((stage) => {
+                  const widthPct = Math.max((stage.count / maxCrewCount) * 100, 4);
                   const color = COHORT_COLORS[stage.stage] || 'bg-white/20';
                   const textColor = COHORT_TEXT_COLORS[stage.stage] || 'text-white/60';
                   return (
@@ -230,8 +230,8 @@ export default function AnalyticsPage() {
                     </div>
                   );
                 })}
-                {cohortStages.length === 0 && (
-                  <p className="text-white/30 text-center py-8">No cohort funnel data available.</p>
+                {crewStages.length === 0 && (
+                  <p className="text-white/30 text-center py-8">No crew funnel data available.</p>
                 )}
               </CardContent>
             </Card>

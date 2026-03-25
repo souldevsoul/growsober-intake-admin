@@ -11,7 +11,7 @@ test.describe('Analytics Page', () => {
     // Wait for data
     await expect(page.getByText(/Lead Funnel/i)).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/Source Attribution/i)).toBeVisible();
-    await expect(page.getByText(/Cohort Funnel/i)).toBeVisible();
+    await expect(page.getByText(/Crew Funnel/i)).toBeVisible();
   });
 
   test('shows funnel stage counts', async ({ page }) => {
