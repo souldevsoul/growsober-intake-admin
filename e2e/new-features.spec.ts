@@ -76,34 +76,34 @@ test.describe('Lead Detail — New Features', () => {
 });
 
 // ===========================================================================
-// Cohort Detail — New Features
+// Crew Detail — New Features
 // ===========================================================================
 
-test.describe('Cohort Detail — New Features', () => {
-  test('shows chat section on cohort detail', async ({ page }) => {
-    await page.goto('/crm/cohorts');
+test.describe('Crew Detail — New Features', () => {
+  test('shows chat section on crew detail', async ({ page }) => {
+    await page.goto('/crm/crews');
     await page.waitForTimeout(2000);
 
-    // Click first cohort
-    const firstCohort = page.locator('[cursor=pointer]').first();
-    if (await firstCohort.count() > 0) {
-      await firstCohort.click();
-      await page.waitForURL(/\/crm\/cohorts\/.+/);
+    // Click first crew
+    const firstCrew = page.locator('[cursor=pointer]').first();
+    if (await firstCrew.count() > 0) {
+      await firstCrew.click();
+      await page.waitForURL(/\/crm\/crews\/.+/);
       await page.waitForSelector('text=Back', { timeout: 10_000 });
 
       // Chat section should exist
-      await expect(page.getByText(/Cohort Chat/i)).toBeAttached();
+      await expect(page.getByText(/Crew Chat/i)).toBeAttached();
     }
   });
 
-  test('shows NPS section on cohort detail', async ({ page }) => {
-    await page.goto('/crm/cohorts');
+  test('shows NPS section on crew detail', async ({ page }) => {
+    await page.goto('/crm/crews');
     await page.waitForTimeout(2000);
 
-    const firstCohort = page.locator('[cursor=pointer]').first();
-    if (await firstCohort.count() > 0) {
-      await firstCohort.click();
-      await page.waitForURL(/\/crm\/cohorts\/.+/);
+    const firstCrew = page.locator('[cursor=pointer]').first();
+    if (await firstCrew.count() > 0) {
+      await firstCrew.click();
+      await page.waitForURL(/\/crm\/crews\/.+/);
       await page.waitForSelector('text=Back', { timeout: 10_000 });
 
       await expect(page.getByText(/NPS/i).first()).toBeAttached();
@@ -137,8 +137,8 @@ test.describe('Complete Navigation', () => {
     await page.getByRole('link', { name: 'Analytics' }).click();
     await expect(page.getByRole('heading', { name: /Analytics/i })).toBeVisible();
 
-    await page.getByRole('link', { name: 'Cohorts' }).click();
-    await expect(page.getByRole('heading', { name: 'Cohorts' })).toBeVisible();
+    await page.getByRole('link', { name: 'Crews' }).click();
+    await expect(page.getByRole('heading', { name: 'Crews' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Automations' }).click();
     await expect(page.getByRole('heading', { name: 'Automations' })).toBeVisible();

@@ -83,18 +83,18 @@ test.describe('Automations Page', () => {
 });
 
 // ===========================================================================
-// Cohorts Page
+// Crews Page
 // ===========================================================================
 
-test.describe('Cohorts Page', () => {
+test.describe('Crews Page', () => {
   test('loads with heading and Generate button', async ({ page }) => {
-    await page.goto('/crm/cohorts');
-    await expect(page.getByRole('heading', { name: 'Cohorts' })).toBeVisible();
+    await page.goto('/crm/crews');
+    await expect(page.getByRole('heading', { name: 'Crews' })).toBeVisible();
     await expect(page.getByRole('button', { name: /generate/i })).toBeVisible();
   });
 
   test('shows status filter', async ({ page }) => {
-    await page.goto('/crm/cohorts');
+    await page.goto('/crm/crews');
     // Status filter should be present
     const statusFilter = page.locator('select');
     if (await statusFilter.count() > 0) {
@@ -102,27 +102,27 @@ test.describe('Cohorts Page', () => {
     }
   });
 
-  test('shows empty state or cohort cards', async ({ page }) => {
-    await page.goto('/crm/cohorts');
+  test('shows empty state or crew cards', async ({ page }) => {
+    await page.goto('/crm/crews');
     // Wait for loading to complete
     await page.waitForTimeout(2000);
 
-    // Either "No cohorts" message or cohort cards should be visible
-    const hasContent = (await page.getByText(/no cohorts|0 cohorts/i).count()) > 0 ||
+    // Either "No crews" message or crew cards should be visible
+    const hasContent = (await page.getByText(/no crews|0 crews/i).count()) > 0 ||
       (await page.getByText(/Crew #/i).count()) > 0;
     expect(hasContent).toBe(true);
   });
 
-  test('sidebar has Cohorts link', async ({ page }) => {
+  test('sidebar has Crews link', async ({ page }) => {
     await page.goto('/crm');
-    await expect(page.getByRole('link', { name: 'Cohorts' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Crews' })).toBeVisible();
   });
 
-  test('navigates to Cohorts page from sidebar', async ({ page }) => {
+  test('navigates to Crews page from sidebar', async ({ page }) => {
     await page.goto('/crm');
-    await page.getByRole('link', { name: 'Cohorts' }).click();
-    await expect(page).toHaveURL(/\/crm\/cohorts/);
-    await expect(page.getByRole('heading', { name: 'Cohorts' })).toBeVisible();
+    await page.getByRole('link', { name: 'Crews' }).click();
+    await expect(page).toHaveURL(/\/crm\/crews/);
+    await expect(page.getByRole('heading', { name: 'Crews' })).toBeVisible();
   });
 });
 
@@ -162,8 +162,8 @@ test.describe('Full Navigation with New Pages', () => {
     await page.goto('/crm');
     await expect(page.getByRole('heading', { name: 'Leads' })).toBeVisible();
 
-    await page.getByRole('link', { name: 'Cohorts' }).click();
-    await expect(page.getByRole('heading', { name: 'Cohorts' })).toBeVisible();
+    await page.getByRole('link', { name: 'Crews' }).click();
+    await expect(page.getByRole('heading', { name: 'Crews' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Automations' }).click();
     await expect(page.getByRole('heading', { name: 'Automations' })).toBeVisible();

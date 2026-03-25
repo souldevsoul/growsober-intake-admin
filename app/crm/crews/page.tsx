@@ -4,17 +4,17 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import {
-  getCohorts,
-  generateCohorts,
-  confirmCohort,
-  sendCohortInvitations,
-  createCohortEvent,
-  sendCohortReminders,
-  completeCohort,
-  cancelCohort,
-  deleteCohort,
+  getCrews,
+  generateCrews,
+  confirmCrew,
+  sendCrewInvitations,
+  createCrewEvent,
+  sendCrewReminders,
+  completeCrew,
+  cancelCrew,
+  deleteCrew,
 } from '@/lib/api';
-import type { Cohort } from '@/lib/api';
+import type { Crew } from '@/lib/api';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -45,9 +45,9 @@ function RsvpIcon({ status }: { status: string }) {
   return <HelpCircle className="w-3 h-3 text-white/30" />;
 }
 
-export default function CohortsPage() {
+export default function CrewsPage() {
   const router = useRouter();
-  const [cohorts, setCohorts] = useState<Cohort[]>([]);
+  const [crews, setCrews] = useState<Crew[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -67,11 +67,11 @@ export default function CohortsPage() {
     try {
       const params: Record<string, string> = {};
       if (statusFilter !== 'all') params.status = statusFilter;
-      const result = await getCohorts(params);
-      setCohorts(result.data || []);
+      const result = await getCrews(params);
+      setCrews(result.data || []);
       setTotal(result.meta?.total || 0);
     } catch (err) {
-      console.error('Failed to fetch cohorts:', err);
+      console.error('Failed to fetch crews:', err);
     } finally {
       setLoading(false);
     }
@@ -85,12 +85,12 @@ export default function CohortsPage() {
     setGenerating(true);
     try {
       const params = generateCity.trim() ? { city: generateCity.trim() } : undefined;
-      await generateCohorts(params);
+      await generateCrews(params);
       setShowGenerateForm(false);
       setGenerateCity('');
       fetchData();
     } catch (err) {
-      console.error('Failed to generate cohorts:', err);
+      console.error('Failed to generate crews:', err);
     } finally {
       setGenerating(false);
     }
@@ -100,7 +100,7 @@ export default function CohortsPage() {
     if (!confirmDate) return;
     setActionLoading(id);
     try {
-      await confirmCohort(id, {
+      await confirmCrew(id, {
         eventDate: new Date(confirmDate).toISOString(),
         eventLocation: confirmLocation || undefined,
         eventNotes: confirmNotes || undefined,
@@ -111,7 +111,7 @@ export default function CohortsPage() {
       setConfirmNotes('');
       fetchData();
     } catch (err) {
-      console.error('Failed to confirm cohort:', err);
+      console.error('Failed to confirm crew:', err);
     } finally {
       setActionLoading(null);
     }
@@ -135,7 +135,7 @@ export default function CohortsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Cohorts</h1>
+            <h1 className="text-2xl font-bold">Crews</h1>
             <Badge variant="secondary" className="bg-white/[0.04] text-white/60 mono-num">
               {total}
             </Badge>
@@ -158,7 +158,7 @@ export default function CohortsPage() {
               onClick={() => setShowGenerateForm(!showGenerateForm)}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              Generate Cohorts
+              Generate Crews
             </Button>
           </div>
         </div>
@@ -196,35 +196,35 @@ export default function CohortsPage() {
           </div>
         )}
 
-        {/* Cohort Cards */}
+        {/* Crew Cards */}
         {loading ? (
           <p className="text-white/30 text-center py-8">Loading...</p>
-        ) : cohorts.length === 0 ? (
+        ) : crews.length === 0 ? (
           <p className="text-white/30 text-center py-8">
-            No cohorts found. Generate some to get started.
+            No crews found. Generate some to get started.
           </p>
         ) : (
           <div className="space-y-3">
-            {cohorts.map((cohort) => (
+            {crews.map((crew) => (
               <div
-                key={cohort.id}
+                key={crew.id}
                 className="bg-black border border-white/[0.15] rounded-lg p-4 hover:border-white/[0.25] transition-colors cursor-pointer"
-                onClick={() => router.push(`/crm/cohorts/${cohort.id}`)}
+                onClick={() => router.push(`/crm/crews/${crew.id}`)}
               >
                 <div className="flex items-start justify-between">
                   {/* Left side: info */}
                   <div className="space-y-3 flex-1 min-w-0">
                     {/* Name + City + Status */}
                     <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="font-semibold text-white text-lg">{cohort.name}</h3>
-                      {cohort.city && (
-                        <span className="text-sm text-white/40">{cohort.city}</span>
+                      <h3 className="font-semibold text-white text-lg">{crew.name}</h3>
+                      {crew.city && (
+                        <span className="text-sm text-white/40">{crew.city}</span>
                       )}
                       <Badge
                         variant="outline"
-                        className={`uppercase tracking-wider text-xs font-semibold ${STATUS_COLORS[cohort.status] || ''}`}
+                        className={`uppercase tracking-wider text-xs font-semibold ${STATUS_COLORS[crew.status] || ''}`}
                       >
-                        {cohort.status.replace('_', ' ')}
+                        {crew.status.replace('_', ' ')}
                       </Badge>
                     </div>
 
@@ -232,26 +232,26 @@ export default function CohortsPage() {
                     <div className="flex items-center gap-4 text-sm text-white/40">
                       <span className="flex items-center gap-1 mono-num">
                         <Users className="w-4 h-4" />
-                        {cohort.members?.length || 0} members
+                        {crew.members?.length || 0} members
                       </span>
-                      {cohort.eventDate && (
+                      {crew.eventDate && (
                         <span className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          {format(new Date(cohort.eventDate), 'MMM d, yyyy h:mm a')}
+                          {format(new Date(crew.eventDate), 'MMM d, yyyy h:mm a')}
                         </span>
                       )}
-                      {cohort.eventLocation && (
+                      {crew.eventLocation && (
                         <span className="flex items-center gap-1">
                           <MapPin className="w-4 h-4" />
-                          {cohort.eventLocation}
+                          {crew.eventLocation}
                         </span>
                       )}
                     </div>
 
                     {/* Member pills */}
-                    {cohort.members && cohort.members.length > 0 && (
+                    {crew.members && crew.members.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
-                        {cohort.members.map((member) => (
+                        {crew.members.map((member) => (
                           <span
                             key={member.id}
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.04] text-xs text-white/60"
@@ -264,7 +264,7 @@ export default function CohortsPage() {
                     )}
 
                     {/* Inline confirm form */}
-                    {confirmingId === cohort.id && (
+                    {confirmingId === crew.id && (
                       <div
                         className="flex items-end gap-3 mt-2 p-3 bg-white/[0.04] rounded-lg"
                         onClick={(e) => e.stopPropagation()}
@@ -304,11 +304,11 @@ export default function CohortsPage() {
                         </div>
                         <Button
                           size="sm"
-                          onClick={() => handleConfirm(cohort.id)}
-                          disabled={!confirmDate || actionLoading === cohort.id}
+                          onClick={() => handleConfirm(crew.id)}
+                          disabled={!confirmDate || actionLoading === crew.id}
                           className="bg-blue-600 hover:bg-blue-700"
                         >
-                          {actionLoading === cohort.id ? (
+                          {actionLoading === crew.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
                             'Save'
@@ -336,13 +336,13 @@ export default function CohortsPage() {
                     className="flex items-center gap-2 ml-4 shrink-0"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {cohort.status === 'DRAFT' && (
+                    {crew.status === 'DRAFT' && (
                       <>
                         <Button
                           size="sm"
-                          onClick={() => setConfirmingId(cohort.id)}
+                          onClick={() => setConfirmingId(crew.id)}
                           className="bg-blue-600 hover:bg-blue-700"
-                          disabled={actionLoading === cohort.id}
+                          disabled={actionLoading === crew.id}
                         >
                           Confirm
                         </Button>
@@ -350,28 +350,28 @@ export default function CohortsPage() {
                           size="sm"
                           variant="outline"
                           onClick={() =>
-                            handleAction(cohort.id, () => deleteCohort(cohort.id))
+                            handleAction(crew.id, () => deleteCrew(crew.id))
                           }
                           className="border-red-500/30 text-red-400 hover:bg-red-500/10"
-                          disabled={actionLoading === cohort.id}
+                          disabled={actionLoading === crew.id}
                         >
                           Delete
                         </Button>
                       </>
                     )}
 
-                    {cohort.status === 'CONFIRMED' && (
+                    {crew.status === 'CONFIRMED' && (
                       <Button
                         size="sm"
                         onClick={() =>
-                          handleAction(cohort.id, () =>
-                            sendCohortInvitations(cohort.id)
+                          handleAction(crew.id, () =>
+                            sendCrewInvitations(crew.id)
                           )
                         }
                         className="bg-yellow-600 hover:bg-yellow-700"
-                        disabled={actionLoading === cohort.id}
+                        disabled={actionLoading === crew.id}
                       >
-                        {actionLoading === cohort.id ? (
+                        {actionLoading === crew.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           'Send Invitations'
@@ -379,17 +379,17 @@ export default function CohortsPage() {
                       </Button>
                     )}
 
-                    {cohort.status === 'INVITED' && (
+                    {crew.status === 'INVITED' && (
                       <>
                         <Button
                           size="sm"
                           onClick={() =>
-                            handleAction(cohort.id, () =>
-                              createCohortEvent(cohort.id)
+                            handleAction(crew.id, () =>
+                              createCrewEvent(crew.id)
                             )
                           }
                           className="bg-green-600 hover:bg-green-700"
-                          disabled={actionLoading === cohort.id}
+                          disabled={actionLoading === crew.id}
                         >
                           Create Event
                         </Button>
@@ -397,29 +397,29 @@ export default function CohortsPage() {
                           size="sm"
                           variant="outline"
                           onClick={() =>
-                            handleAction(cohort.id, () =>
-                              sendCohortReminders(cohort.id)
+                            handleAction(crew.id, () =>
+                              sendCrewReminders(crew.id)
                             )
                           }
                           className="border-white/[0.12] text-white/60 hover:bg-white/[0.06]"
-                          disabled={actionLoading === cohort.id}
+                          disabled={actionLoading === crew.id}
                         >
                           Send Reminders
                         </Button>
                       </>
                     )}
 
-                    {cohort.status === 'EVENT_CREATED' && (
+                    {crew.status === 'EVENT_CREATED' && (
                       <>
                         <Button
                           size="sm"
                           onClick={() =>
-                            handleAction(cohort.id, () =>
-                              completeCohort(cohort.id)
+                            handleAction(crew.id, () =>
+                              completeCrew(crew.id)
                             )
                           }
                           className="bg-emerald-600 hover:bg-emerald-700"
-                          disabled={actionLoading === cohort.id}
+                          disabled={actionLoading === crew.id}
                         >
                           Complete
                         </Button>
@@ -427,33 +427,33 @@ export default function CohortsPage() {
                           size="sm"
                           variant="outline"
                           onClick={() =>
-                            handleAction(cohort.id, () =>
-                              sendCohortReminders(cohort.id)
+                            handleAction(crew.id, () =>
+                              sendCrewReminders(crew.id)
                             )
                           }
                           className="border-white/[0.12] text-white/60 hover:bg-white/[0.06]"
-                          disabled={actionLoading === cohort.id}
+                          disabled={actionLoading === crew.id}
                         >
                           Send Reminders
                         </Button>
                       </>
                     )}
 
-                    {cohort.status !== 'COMPLETED' && cohort.status !== 'CANCELLED' && (
+                    {crew.status !== 'COMPLETED' && crew.status !== 'CANCELLED' && (
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() =>
-                          handleAction(cohort.id, () => cancelCohort(cohort.id))
+                          handleAction(crew.id, () => cancelCrew(crew.id))
                         }
                         className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                        disabled={actionLoading === cohort.id}
+                        disabled={actionLoading === crew.id}
                       >
                         Cancel
                       </Button>
                     )}
 
-                    {actionLoading === cohort.id && cohort.status !== 'DRAFT' && (
+                    {actionLoading === crew.id && crew.status !== 'DRAFT' && (
                       <Loader2 className="w-4 h-4 animate-spin text-white/40" />
                     )}
                   </div>

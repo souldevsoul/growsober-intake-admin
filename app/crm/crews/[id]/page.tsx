@@ -5,26 +5,26 @@ import { useParams, useRouter } from 'next/navigation';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ChevronLeft } from 'lucide-react';
 import {
-  getCohort,
-  confirmCohort,
-  sendCohortInvitations,
-  createCohortEvent,
-  sendCohortReminders,
-  completeCohort,
-  cancelCohort,
-  deleteCohort,
-  addCohortMember,
-  removeCohortMember,
+  getCrew,
+  confirmCrew,
+  sendCrewInvitations,
+  createCrewEvent,
+  sendCrewReminders,
+  completeCrew,
+  cancelCrew,
+  deleteCrew,
+  addCrewMember,
+  removeCrewMember,
   updateMemberRsvp,
   markMemberAttendance,
   getCrmLeads,
-  getCohortChat,
-  sendCohortChatMessage,
+  getCrewChat,
+  sendCrewChatMessage,
   getNpsResults,
   sendNpsSurveys,
-  recreateCohort,
+  recreateCrew,
 } from '@/lib/api';
-import type { Cohort, CohortMember, CrmLead, ChatMessage, NpsResults } from '@/lib/api';
+import type { Crew, CrewMember, CrmLead, ChatMessage, NpsResults } from '@/lib/api';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -55,12 +55,12 @@ const RSVP_BADGE: Record<string, string> = {
   CANCELLED: 'bg-gray-500/20 text-white/40 border-gray-500/30',
 };
 
-export default function CohortDetailPage() {
+export default function CrewDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
-  const [cohort, setCohort] = useState<Cohort | null>(null);
+  const [crew, setCrew] = useState<Crew | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -90,12 +90,12 @@ export default function CohortDetailPage() {
   // Recreate
   const [recreateLoading, setRecreateLoading] = useState(false);
 
-  const fetchCohort = useCallback(async () => {
+  const fetchCrew = useCallback(async () => {
     try {
-      const data = await getCohort(id);
-      setCohort(data);
+      const data = await getCrew(id);
+      setCrew(data);
     } catch (err) {
-      console.error('Failed to fetch cohort:', err);
+      console.error('Failed to fetch crew:', err);
     } finally {
       setLoading(false);
     }
@@ -104,7 +104,7 @@ export default function CohortDetailPage() {
   const fetchChat = useCallback(async () => {
     setChatLoading(true);
     try {
-      const result = await getCohortChat(id);
+      const result = await getCrewChat(id);
       setChatMessages(result.data || []);
     } catch (err) {
       console.error('Failed to fetch chat:', err);
@@ -127,11 +127,11 @@ export default function CohortDetailPage() {
 
   useEffect(() => {
     if (id) {
-      fetchCohort();
+      fetchCrew();
       fetchChat();
       fetchNps();
     }
-  }, [id, fetchCohort, fetchChat, fetchNps]);
+  }, [id, fetchCrew, fetchChat, fetchNps]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -147,8 +147,8 @@ export default function CohortDetailPage() {
       setSearchLoading(true);
       try {
         const result = await getCrmLeads({ status: 'MATCHED', search: searchQuery });
-        // Filter out leads already in the cohort
-        const memberLeadIds = new Set(cohort?.members?.map((m) => m.leadId) || []);
+        // Filter out leads already in the crew
+        const memberLeadIds = new Set(crew?.members?.map((m) => m.leadId) || []);
         setSearchResults(result.data.filter((l) => !memberLeadIds.has(l.id)));
       } catch (err) {
         console.error('Failed to search leads:', err);
@@ -157,13 +157,13 @@ export default function CohortDetailPage() {
       }
     }, 300);
     return () => clearTimeout(timeout);
-  }, [searchQuery, cohort?.members]);
+  }, [searchQuery, crew?.members]);
 
   const withAction = async (fn: () => Promise<unknown>) => {
     setActionLoading(true);
     try {
       await fn();
-      await fetchCohort();
+      await fetchCrew();
     } catch (err) {
       console.error('Action failed:', err);
     } finally {
@@ -173,7 +173,7 @@ export default function CohortDetailPage() {
 
   const handleConfirm = () =>
     withAction(async () => {
-      await confirmCohort(id, {
+      await confirmCrew(id, {
         eventDate: new Date(confirmDate).toISOString(),
         eventLocation: confirmLocation || undefined,
         eventNotes: confirmNotes || undefined,
@@ -181,33 +181,33 @@ export default function CohortDetailPage() {
       setShowConfirmForm(false);
     });
 
-  const handleSendInvitations = () => withAction(() => sendCohortInvitations(id));
-  const handleCreateEvent = () => withAction(() => createCohortEvent(id));
-  const handleSendReminders = () => withAction(() => sendCohortReminders(id));
-  const handleComplete = () => withAction(() => completeCohort(id));
+  const handleSendInvitations = () => withAction(() => sendCrewInvitations(id));
+  const handleCreateEvent = () => withAction(() => createCrewEvent(id));
+  const handleSendReminders = () => withAction(() => sendCrewReminders(id));
+  const handleComplete = () => withAction(() => completeCrew(id));
 
   const handleCancel = () => {
-    if (!confirm('Cancel this cohort? This cannot be undone.')) return;
-    withAction(() => cancelCohort(id));
+    if (!confirm('Cancel this crew? This cannot be undone.')) return;
+    withAction(() => cancelCrew(id));
   };
 
   const handleDelete = () => {
-    if (!confirm('Delete this cohort? This cannot be undone.')) return;
+    if (!confirm('Delete this crew? This cannot be undone.')) return;
     withAction(async () => {
-      await deleteCohort(id);
-      router.push('/crm/cohorts');
+      await deleteCrew(id);
+      router.push('/crm/crews');
     });
   };
 
   const handleAddMember = (leadId: string) =>
     withAction(async () => {
-      await addCohortMember(id, leadId);
+      await addCrewMember(id, leadId);
       setSearchQuery('');
       setSearchResults([]);
     });
 
   const handleRemoveMember = (memberId: string) =>
-    withAction(() => removeCohortMember(id, memberId));
+    withAction(() => removeCrewMember(id, memberId));
 
   const handleRsvp = (memberId: string, rsvpStatus: string) =>
     withAction(() => updateMemberRsvp(memberId, rsvpStatus));
@@ -219,7 +219,7 @@ export default function CohortDetailPage() {
     if (!chatInput.trim()) return;
     setChatSending(true);
     try {
-      await sendCohortChatMessage(id, chatInput.trim());
+      await sendCrewChatMessage(id, chatInput.trim());
       setChatInput('');
       fetchChat();
     } catch (err) {
@@ -241,13 +241,13 @@ export default function CohortDetailPage() {
     }
   };
 
-  const handleRecreateCohort = async () => {
+  const handleRecreateCrew = async () => {
     setRecreateLoading(true);
     try {
-      const newCohort = await recreateCohort(id);
-      router.push(`/crm/cohorts/${newCohort.id}`);
+      const newCrew = await recreateCrew(id);
+      router.push(`/crm/crews/${newCrew.id}`);
     } catch (err) {
-      console.error('Failed to recreate cohort:', err);
+      console.error('Failed to recreate crew:', err);
     } finally {
       setRecreateLoading(false);
     }
@@ -261,21 +261,21 @@ export default function CohortDetailPage() {
     );
   }
 
-  if (!cohort) {
+  if (!crew) {
     return (
       <div className="min-h-screen bg-black neon-grid-bg text-white p-6">
-        <p className="text-white/30">Cohort not found</p>
+        <p className="text-white/30">Crew not found</p>
       </div>
     );
   }
 
-  const members = cohort.members || [];
-  const isDraft = cohort.status === 'DRAFT';
-  const isConfirmed = cohort.status === 'CONFIRMED';
-  const isInvited = cohort.status === 'INVITED';
-  const isEventCreated = cohort.status === 'EVENT_CREATED';
-  const isCompleted = cohort.status === 'COMPLETED';
-  const isCancelled = cohort.status === 'CANCELLED';
+  const members = crew.members || [];
+  const isDraft = crew.status === 'DRAFT';
+  const isConfirmed = crew.status === 'CONFIRMED';
+  const isInvited = crew.status === 'INVITED';
+  const isEventCreated = crew.status === 'EVENT_CREATED';
+  const isCompleted = crew.status === 'COMPLETED';
+  const isCancelled = crew.status === 'CANCELLED';
   const showAttendance = isEventCreated || isCompleted;
   const showRsvpActions = isInvited || isEventCreated || isCompleted;
 
@@ -303,20 +303,20 @@ export default function CohortDetailPage() {
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
-            onClick={() => router.push('/crm/cohorts')}
+            onClick={() => router.push('/crm/crews')}
             className="text-white/40"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">{cohort.name}</h1>
+            <h1 className="text-2xl font-bold">{crew.name}</h1>
             <p className="text-white/40 text-sm">
-              {cohort.city || 'No city'}{cohort.hub ? ` \u00b7 ${cohort.hub.name}` : ''}
+              {crew.city || 'No city'}{crew.hub ? ` \u00b7 ${crew.hub.name}` : ''}
             </p>
           </div>
-          <Badge variant="outline" className={`uppercase tracking-wider text-xs font-semibold ${STATUS_BADGE[cohort.status] || ''}`}>
-            {cohort.status.replace('_', ' ')}
+          <Badge variant="outline" className={`uppercase tracking-wider text-xs font-semibold ${STATUS_BADGE[crew.status] || ''}`}>
+            {crew.status.replace('_', ' ')}
           </Badge>
         </div>
 
@@ -390,11 +390,11 @@ export default function CohortDetailPage() {
           )}
           {isCompleted && (
             <Button
-              onClick={handleRecreateCohort}
+              onClick={handleRecreateCrew}
               disabled={recreateLoading}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              {recreateLoading ? 'Recreating...' : 'Recreate Cohort'}
+              {recreateLoading ? 'Recreating...' : 'Recreate Crew'}
             </Button>
           )}
           {!isCompleted && !isCancelled && (
@@ -404,7 +404,7 @@ export default function CohortDetailPage() {
               disabled={actionLoading}
               className="border-red-500/50 text-red-400 hover:bg-red-500/10"
             >
-              Cancel Cohort
+              Cancel Crew
             </Button>
           )}
         </div>
@@ -413,7 +413,7 @@ export default function CohortDetailPage() {
         {showConfirmForm && (
           <Card className="neon-card">
             <CardHeader>
-              <CardTitle className="text-lg">Confirm Cohort</CardTitle>
+              <CardTitle className="text-lg">Confirm Crew</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -450,7 +450,7 @@ export default function CohortDetailPage() {
                   disabled={!confirmDate || actionLoading}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  Confirm Cohort
+                  Confirm Crew
                 </Button>
                 <Button
                   variant="ghost"
@@ -465,7 +465,7 @@ export default function CohortDetailPage() {
         )}
 
         {/* Event Details */}
-        {cohort.eventDate && (
+        {crew.eventDate && (
           <Card className="neon-card">
             <CardHeader>
               <CardTitle className="text-lg">Event Details</CardTitle>
@@ -475,26 +475,26 @@ export default function CohortDetailPage() {
                 <div>
                   <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Date</p>
                   <p className="text-sm font-medium">
-                    {format(new Date(cohort.eventDate), 'PPP p')}
+                    {format(new Date(crew.eventDate), 'PPP p')}
                   </p>
                 </div>
-                {cohort.eventLocation && (
+                {crew.eventLocation && (
                   <div>
                     <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Location</p>
-                    <p className="text-sm font-medium">{cohort.eventLocation}</p>
+                    <p className="text-sm font-medium">{crew.eventLocation}</p>
                   </div>
                 )}
-                {cohort.eventNotes && (
+                {crew.eventNotes && (
                   <div>
                     <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Notes</p>
-                    <p className="text-sm text-white/60">{cohort.eventNotes}</p>
+                    <p className="text-sm text-white/60">{crew.eventNotes}</p>
                   </div>
                 )}
               </div>
-              {cohort.event && (
+              {crew.event && (
                 <div className="pt-2 border-t border-white/[0.08]">
                   <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Event</p>
-                  <p className="text-sm font-medium text-blue-400">{cohort.event.title}</p>
+                  <p className="text-sm font-medium text-blue-400">{crew.event.title}</p>
                 </div>
               )}
             </CardContent>
@@ -730,10 +730,10 @@ export default function CohortDetailPage() {
           </Card>
         )}
 
-        {/* Cohort Chat */}
+        {/* Crew Chat */}
         <Card className="neon-card">
           <CardHeader>
-            <CardTitle className="text-lg">Cohort Chat</CardTitle>
+            <CardTitle className="text-lg">Crew Chat</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Messages */}
@@ -780,7 +780,7 @@ export default function CohortDetailPage() {
                     handleSendChat();
                   }
                 }}
-                placeholder="Type a message to the cohort..."
+                placeholder="Type a message to the crew..."
                 className="flex-1 bg-white/[0.04] border border-white/[0.12] rounded-md p-2 text-sm text-white placeholder:text-white/30 resize-none"
                 rows={2}
               />

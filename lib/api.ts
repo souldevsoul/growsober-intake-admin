@@ -435,10 +435,10 @@ export async function getAutomationLogs(params?: Record<string, string>): Promis
 }
 
 // ============================================================================
-// CRM API — Cohorts
+// CRM API — Crews
 // ============================================================================
 
-export interface CohortMember {
+export interface CrewMember {
   id: string;
   cohortId: string;
   leadId: string;
@@ -451,7 +451,7 @@ export interface CohortMember {
   attended: boolean;
 }
 
-export interface Cohort {
+export interface Crew {
   id: string;
   name: string;
   status: 'DRAFT' | 'CONFIRMED' | 'INVITED' | 'EVENT_CREATED' | 'COMPLETED' | 'CANCELLED';
@@ -465,79 +465,79 @@ export interface Cohort {
   eventNotes: string | null;
   invitedAt: string | null;
   reminderSentAt: string | null;
-  members: CohortMember[];
+  members: CrewMember[];
   createdAt: string;
 }
 
-export async function generateCohorts(params?: { city?: string; minSize?: number; maxSize?: number }): Promise<Cohort[]> {
-  const { data } = await crmApi.post('/cohorts/generate', params || {});
+export async function generateCrews(params?: { city?: string; minSize?: number; maxSize?: number }): Promise<Crew[]> {
+  const { data } = await crmApi.post('/crews/generate', params || {});
   return data.data || data;
 }
 
-export async function getCohorts(params?: Record<string, string>): Promise<{ data: Cohort[]; meta: { total: number; page: number; limit: number; pages: number } }> {
-  const { data } = await crmApi.get('/cohorts', { params });
+export async function getCrews(params?: Record<string, string>): Promise<{ data: Crew[]; meta: { total: number; page: number; limit: number; pages: number } }> {
+  const { data } = await crmApi.get('/crews', { params });
   const inner = data.data || data;
   if (Array.isArray(inner)) return { data: inner, meta: { total: inner.length, page: 1, limit: 50, pages: 1 } };
   return { data: inner.data || [], meta: inner.meta || { total: 0, page: 1, limit: 50, pages: 1 } };
 }
 
-export async function getCohort(id: string): Promise<Cohort> {
-  const { data } = await crmApi.get(`/cohorts/${id}`);
+export async function getCrew(id: string): Promise<Crew> {
+  const { data } = await crmApi.get(`/crews/${id}`);
   return data.data || data;
 }
 
-export async function confirmCohort(id: string, dto: { eventDate: string; eventLocation?: string; eventNotes?: string }): Promise<Cohort> {
-  const { data } = await crmApi.post(`/cohorts/${id}/confirm`, dto);
+export async function confirmCrew(id: string, dto: { eventDate: string; eventLocation?: string; eventNotes?: string }): Promise<Crew> {
+  const { data } = await crmApi.post(`/crews/${id}/confirm`, dto);
   return data.data || data;
 }
 
-export async function sendCohortInvitations(id: string): Promise<Cohort> {
-  const { data } = await crmApi.post(`/cohorts/${id}/invite`);
+export async function sendCrewInvitations(id: string): Promise<Crew> {
+  const { data } = await crmApi.post(`/crews/${id}/invite`);
   return data.data || data;
 }
 
-export async function createCohortEvent(id: string): Promise<Cohort> {
-  const { data } = await crmApi.post(`/cohorts/${id}/create-event`);
+export async function createCrewEvent(id: string): Promise<Crew> {
+  const { data } = await crmApi.post(`/crews/${id}/create-event`);
   return data.data || data;
 }
 
-export async function sendCohortReminders(id: string): Promise<Cohort> {
-  const { data } = await crmApi.post(`/cohorts/${id}/send-reminders`);
+export async function sendCrewReminders(id: string): Promise<Crew> {
+  const { data } = await crmApi.post(`/crews/${id}/send-reminders`);
   return data.data || data;
 }
 
-export async function completeCohort(id: string) {
-  const { data } = await crmApi.post(`/cohorts/${id}/complete`);
+export async function completeCrew(id: string) {
+  const { data } = await crmApi.post(`/crews/${id}/complete`);
   return data.data || data;
 }
 
-export async function cancelCohort(id: string) {
-  const { data } = await crmApi.post(`/cohorts/${id}/cancel`);
+export async function cancelCrew(id: string) {
+  const { data } = await crmApi.post(`/crews/${id}/cancel`);
   return data.data || data;
 }
 
-export async function deleteCohort(id: string) {
-  const { data } = await crmApi.delete(`/cohorts/${id}`);
+export async function deleteCrew(id: string) {
+  const { data } = await crmApi.delete(`/crews/${id}`);
   return data.data || data;
 }
 
-export async function addCohortMember(cohortId: string, leadId: string) {
-  const { data } = await crmApi.post(`/cohorts/${cohortId}/members`, { leadId });
+export async function addCrewMember(crewId: string, leadId: string) {
+  const { data } = await crmApi.post(`/crews/${crewId}/members`, { leadId });
   return data.data || data;
 }
 
-export async function removeCohortMember(cohortId: string, memberId: string) {
-  const { data } = await crmApi.delete(`/cohorts/${cohortId}/members/${memberId}`);
+export async function removeCrewMember(crewId: string, memberId: string) {
+  const { data } = await crmApi.delete(`/crews/${crewId}/members/${memberId}`);
   return data.data || data;
 }
 
 export async function updateMemberRsvp(memberId: string, rsvpStatus: string, cancelReason?: string) {
-  const { data } = await crmApi.patch(`/cohort-members/${memberId}/rsvp`, { rsvpStatus, cancelReason });
+  const { data } = await crmApi.patch(`/crew-members/${memberId}/rsvp`, { rsvpStatus, cancelReason });
   return data.data || data;
 }
 
 export async function markMemberAttendance(memberId: string, attended: boolean) {
-  const { data } = await crmApi.patch(`/cohort-members/${memberId}/attendance`, { attended });
+  const { data } = await crmApi.patch(`/crew-members/${memberId}/attendance`, { attended });
   return data.data || data;
 }
 
@@ -634,8 +634,8 @@ export async function getWaitlist(city?: string) {
   return data.data || data;
 }
 
-export async function assignWaitlistToCohort(leadId: string, cohortId: string) {
-  const { data } = await crmApi.post(`/waitlist/${leadId}/assign/${cohortId}`);
+export async function assignWaitlistToCrew(leadId: string, crewId: string) {
+  const { data } = await crmApi.post(`/waitlist/${leadId}/assign/${crewId}`);
   return data.data || data;
 }
 
@@ -674,20 +674,20 @@ export async function updateLeadAvailability(leadId: string, preferredDays: stri
 }
 
 // ============================================================================
-// CRM API — Cohort Chat
+// CRM API — Crew Chat
 // ============================================================================
 
 export interface ChatMessage { id: string; chatId: string; leadId: string | null; lead: { id: string; name: string } | null; isSystem: boolean; content: string; createdAt: string; }
 
-export async function getCohortChat(cohortId: string, page = 1): Promise<{ data: ChatMessage[]; meta: any }> {
-  const { data } = await crmApi.get(`/cohorts/${cohortId}/chat`, { params: { page: String(page) } });
+export async function getCrewChat(crewId: string, page = 1): Promise<{ data: ChatMessage[]; meta: any }> {
+  const { data } = await crmApi.get(`/crews/${crewId}/chat`, { params: { page: String(page) } });
   const inner = data.data || data;
   if (Array.isArray(inner)) return { data: inner, meta: { total: inner.length, page: 1, limit: 50, pages: 1 } };
   return { data: inner.data || [], meta: inner.meta || { total: 0, page: 1, limit: 50, pages: 1 } };
 }
 
-export async function sendCohortChatMessage(cohortId: string, content: string, leadId?: string) {
-  const { data } = await crmApi.post(`/cohorts/${cohortId}/chat`, { content, leadId });
+export async function sendCrewChatMessage(crewId: string, content: string, leadId?: string) {
+  const { data } = await crmApi.post(`/crews/${crewId}/chat`, { content, leadId });
   return data.data || data;
 }
 
@@ -697,16 +697,16 @@ export async function sendCohortChatMessage(cohortId: string, content: string, l
 
 export interface NpsResults { totalResponses: number; averageScore: number; nps: number; distribution: Array<{ score: number; count: number }>; }
 
-export async function getNpsResults(cohortId?: string, city?: string): Promise<NpsResults> {
+export async function getNpsResults(crewId?: string, city?: string): Promise<NpsResults> {
   const params: Record<string, string> = {};
-  if (cohortId) params.cohortId = cohortId;
+  if (crewId) params.crewId = crewId;
   if (city) params.city = city;
   const { data } = await crmApi.get('/nps', { params });
   return data.data || data;
 }
 
-export async function sendNpsSurveys(cohortId: string) {
-  const { data } = await crmApi.post(`/cohorts/${cohortId}/send-nps`);
+export async function sendNpsSurveys(crewId: string) {
+  const { data } = await crmApi.post(`/crews/${crewId}/send-nps`);
   return data.data || data;
 }
 
@@ -716,10 +716,10 @@ export async function respondNps(surveyId: string, score: number, feedback?: str
 }
 
 // ============================================================================
-// CRM API — Recurring Cohorts
+// CRM API — Recurring Crews
 // ============================================================================
 
-export async function recreateCohort(cohortId: string): Promise<Cohort> {
-  const { data } = await crmApi.post(`/cohorts/${cohortId}/recreate`);
+export async function recreateCrew(crewId: string): Promise<Crew> {
+  const { data } = await crmApi.post(`/crews/${crewId}/recreate`);
   return data.data || data;
 }

@@ -19,7 +19,7 @@ const nav = [
   { href: '/crm', label: 'Leads', icon: Users },
   { href: '/crm/sequences', label: 'Sequences', icon: Zap },
   { href: '/crm/scheduled', label: 'Scheduled', icon: Clock },
-  { href: '/crm/cohorts', label: 'Cohorts', icon: UsersRound },
+  { href: '/crm/crews', label: 'Crews', icon: UsersRound },
   { href: '/crm/automations', label: 'Automations', icon: Workflow },
   { href: '/crm/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/crm/settings', label: 'Settings', icon: Settings },
